@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>DocLite Pro V8 (Selection Fix)</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+
+<style>
+/* --- CORE CSS --- */
+:root{--w-sb:240px;--w-sb-c:64px;--h-hd:56px;--c-p:#2563eb;--bg:#f8fafc;--txt:#1e293b;--gry:#64748b;--brd:#e2e8f0}
+*{box-sizing:border-box}body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-size:0.85rem}
+.app{display:flex;height:100vh}.main{flex:1;display:flex;flex-direction:column;background:#fff;overflow:hidden}
+
+/* --- SIDEBAR & LANG --- */
+.sb{width:var(--w-sb);background:#0f172a;color:#cbd5e1;display:flex;flex-direction:column;transition:.3s ease;z-index:20;flex-shrink:0;border-right:1px solid #1e293b}
+.sb.c{width:var(--w-sb-c)}.sb.c :is(.brand span,.nav-t,.nav-l span,.hist .fn,.hist-del,.lang-sw){display:none}
+.brand-wrap{height:var(--h-hd);border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem}
+.brand{display:flex;align-items:center;font-weight:700;font-size:1rem;color:#fff;gap:10px}
+.sb.c .brand-wrap{justify-content:center;padding:0}
+.lang-sw{display:flex;gap:4px;font-size:0.75rem;font-weight:600}
+.lang-opt{cursor:pointer;padding:2px 4px;border-radius:4px;color:#64748b;transition:.2s}.lang-opt:hover{color:#fff} .lang-opt.act{background:#3b82f6;color:#fff}
+.nav-t{padding:1.5rem 1.25rem 0.5rem;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em}
+.nav-l{color:#94a3b8;padding:.65rem 1.25rem;display:flex;gap:10px;cursor:pointer;border-left:3px solid transparent;transition:.2s;align-items:center;font-size:0.85rem}
+.nav-l:hover{background:#1e293b;color:#fff}.nav-l.act{background:#1e293b;border-left-color:var(--c-p);color:#fff}
+.sb.c .nav-l{justify-content:center;padding:.75rem 0}
+.hist-box{flex:1;overflow-y:auto;overflow-x:hidden}
+.hist{padding:8px 12px 8px 16px;display:flex;align-items:center;justify-content:space-between;color:#94a3b8;cursor:pointer;border-bottom:1px solid #1e293b;transition:.2s;font-size:0.8rem}
+.hist:hover{background:#1e293b;color:#e2e8f0}
+.hist-l{display:flex;align-items:center;gap:10px;overflow:hidden;flex:1}
+.fn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-del{width:28px;height:28px;border-radius:4px;color:#ef4444;transition:.2s;display:flex;align-items:center;justify-content:center;opacity:0.6}
+.hist-del:hover{background:#ef444420;opacity:1}
+
+/* --- HEADER & SEARCH --- */
+.head{height:var(--h-hd);border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;padding:0 1.5rem;background:#fff}
+.sch{position:relative;color:#64748b}
+.sch i{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px}
+.sch input{padding:8px 12px 8px 34px;border:1px solid #e2e8f0;border-radius:6px;width:300px;outline:none;font-size:0.85rem;color:#1e293b;transition:border-color .2s}
+.sch input:focus{border-color:var(--c-p)}
+
+/* --- TABLE --- */
+.ctn{flex:1;overflow:auto;position:relative;background:#fff}
+table.tbl{width:100%;border-spacing:0;background:#fff;border-collapse:collapse}
+th{position:sticky;top:0;z-index:10;background:#f8fafc;padding:8px 12px;border-bottom:1px solid #cbd5e1;color:#475569;font-size:.7rem;text-transform:uppercase;font-weight:700;text-align:left;white-space:nowrap;user-select:none}
+td{padding:6px 12px;border-bottom:1px solid #e2e8f0;color:#334155;white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis;font-size:0.8rem;height:34px}
+tr:nth-child(even) td { background-color: #f8fafc; } tr:hover td{background-color:#e2e8f0!important; cursor:default}
+.t-num{text-align:right;font-family:'Segoe UI',sans-serif} .t-date{text-align:center;color:#64748b;font-variant-numeric:tabular-nums} .t-curr{text-align:right;color:#059669;font-weight:600} .t-empty{color:#cbd5e1;text-align:center}
+.tbl.excel th,.tbl.excel td{padding:2px 6px;border:1px solid #cbd5e1;font-family:'Segoe UI',sans-serif;font-size:.75rem;height:22px;background:none} .tbl.excel th{background:#f1f5f9;text-transform:none}
+
+/* --- DOC VIEWER (FIXED SELECTION) --- */
+.doc-v{padding:30px;background:#e2e8f0;min-height:100%;display:flex;flex-direction:column;align-items:center;gap:20px}
+.page{background:#fff;width:100%;max-width:800px;min-height:1000px;padding:50px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);color:#0f172a;line-height:1.6;position:relative}
+/* Correção DOCX: Remove fundos e garante seleção nativa */
+.doc-content * { background: transparent !important; box-shadow: none !important; color: inherit !important; }
+.doc-content p { margin-bottom: 0.8em; }
+/* Correção PDF: TextLayer transparente sobre o canvas */
+.pdf-w{padding:0!important;height:auto!important;position:relative}
+.pdf-c{display:block;width:100%}
+.txt-l{position:absolute;inset:0;line-height:1;opacity:1;mix-blend-mode:multiply;pointer-events:auto}
+.txt-l span{color:transparent;cursor:text}
+/* Estilo de seleção global limpo */
+::selection { background: rgba(37, 99, 235, 0.3) !important; color: inherit !important; }
+
+/* --- UI & TOAST --- */
+.pag{padding:8px 16px;border-top:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;background:#fff;font-size:0.8rem;color:#64748b}
+.pag button{background:#fff;border:1px solid #e2e8f0;width:24px;height:24px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pag button:hover:not(:disabled){background:#f8fafc;border-color:#cbd5e1}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gry)}
+.load{position:fixed;inset:0;background:rgba(255,255,255,0.9);z-index:99;display:none;align-items:center;justify-content:center;flex-direction:column}
+.spin{width:30px;height:30px;border:3px solid #e2e8f0;border-top-color:var(--c-p);border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
+/* Toast Notification */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:30px;font-size:0.85rem;font-weight:500;opacity:0;transition:.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);pointer-events:none;z-index:1000;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+.toast.show{opacity:1;bottom:40px}
+/* Modals & Filters */
+.th-c{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.flt-btn{padding:2px;border-radius:3px;cursor:pointer;color:#cbd5e1;transition:.2s} .flt-btn:hover, .flt-btn.act{color:var(--c-p);background:#eff6ff}
+.flt-pn{position:absolute;background:#fff;border:1px solid #cbd5e1;padding:8px;border-radius:6px;box-shadow:0 10px 20px -5px rgba(0,0,0,0.15);width:200px;z-index:100;display:flex;flex-direction:column;gap:8px}
+.flt-ls{max-height:180px;overflow-y:auto;border:1px solid #f1f5f9;border-radius:4px;padding:2px}
+.flt-row{display:flex;gap:6px;padding:3px 6px;font-size:0.8rem;cursor:pointer;align-items:center} .flt-row:hover{background:#f8fafc}
+.mod-ov{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:50;display:none;align-items:center;justify-content:center} .mod-ov.open{display:flex}
+.mod-bx{background:#fff;width:90%;max-width:600px;border-radius:8px;padding:20px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
+.mod-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.mod-i{background:#f8fafc;padding:10px;border:1px solid #e2e8f0;border-radius:4px}
+.mod-l{font-size:.65rem;text-transform:uppercase;color:#64748b;font-weight:700;display:block;margin-bottom:2px}
+.mod-v{font-size:.85rem;color:#0f172a;word-break:break-word}
+.mod-v a {color:var(--c-p);text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} .mod-v a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<input type="file" id="fi" style="display:none" accept=".csv,.xlsx,.xls,.doc,.docx,.pdf,.txt,.json">
+<div id="ld" class="load"><div class="spin"></div><p id="ld-t" style="color:#64748b;margin-top:10px;font-size:0.8rem">Lendo arquivo...</p></div>
+<div id="toast" class="toast">Texto copiado!</div>
+
+<div class="mod-ov" id="mo" onclick="closeModal()">
+    <div class="mod-bx" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid #e2e8f0">
+            <h3 id="md-t" style="margin:0;font-size:1rem">Detalhes</h3>
+            <i data-lucide="x" style="cursor:pointer;width:18px" onclick="closeModal()"></i>
+        </div>
+        <div id="md" class="mod-g"></div>
+    </div>
+</div>
+
+<div class="app">
+    <aside class="sb" id="sb">
+        <div class="brand-wrap">
+            <div class="brand">
+                <div style="background:#3b82f6;padding:4px;border-radius:4px;display:flex"><i data-lucide="table-2" class="text-white" width="16" style="color:white"></i></div>
+                <span>DocLite</span>
+            </div>
+            <div class="lang-sw">
+                <span class="lang-opt act" onclick="setLang('pt')">PT</span>
+                <span style="opacity:0.5">|</span>
+                <span class="lang-opt" onclick="setLang('en')">EN</span>
+            </div>
+        </div>
+        <div class="hist-box">
+            <div class="nav-t" data-t="view">Visualização</div>
+            <div class="nav-l act" id="bm" onclick="setView('modern')"><i data-lucide="layout-list" width="16"></i><span data-t="list">Lista</span></div>
+            <div class="nav-l" id="be" onclick="setView('excel')"><i data-lucide="grid-3x3" width="16"></i><span data-t="grid">Grade</span></div>
+            
+            <div class="nav-t" data-t="actions">Ações</div>
+            <div class="nav-l" onclick="document.getElementById('fi').click()"><i data-lucide="folder-plus" width="16" style="color:#60a5fa"></i><span style="color:#fff" data-t="open">Abrir Arquivo</span></div>
+            
+            <div class="nav-t" data-t="recent">Recentes</div>
+            <div id="hl"></div>
+        </div>
+        <div style="padding:10px;border-top:1px solid #1e293b;cursor:pointer;text-align:right" onclick="toggleSb()"><i data-lucide="chevron-left" id="ti" width="16"></i></div>
+    </aside>
+    
+    <main class="main">
+        <header class="head">
+            <h3 id="pt" style="margin:0;color:#1e293b;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px">Início</h3>
+            <div id="ht" style="display:flex;gap:10px;align-items:center">
+                <div class="sch">
+                    <i data-lucide="search"></i>
+                    <input id="si" oninput="search(this.value)" placeholder="Filtrar dados...">
+                </div>
+                <span id="rc" style="font-size:.7rem;color:var(--gry);background:#f1f5f9;padding:2px 6px;border-radius:4px;border:1px solid #e2e8f0"></span>
+            </div>
+        </header>
+        <div class="ctn" id="tc"></div>
+        <div class="pag" id="pg" style="display:none"></div>
+    </main>
+</div>
+
+<script>
+// --- TRANSLATION ---
+const T={pt:{view:"Visualização",list:"Lista",grid:"Grade",actions:"Ações",open:"Abrir Arquivo",recent:"Recentes",empty:"Nenhum arquivo",home:"Início",search:"Filtrar dados...",rows:"linhas",load:"Lendo arquivo...",detTitle:"Detalhes",toastCopy:"Texto copiado!",impBtn:"Importar"},en:{view:"View Mode",list:"List",grid:"Grid",actions:"Actions",open:"Open File",recent:"Recent",empty:"No file open",home:"Home",search:"Search data...",rows:"rows",load:"Reading file...",detTitle:"Details",toastCopy:"Text copied!",impBtn:"Import"}};
+let L=localStorage.getItem('dl_lang')||'pt';
+
+// --- CORE ---
+let S={d:[],m:'empty',c:null,fd:[],cols:[],types:{},vm:'modern',q:'',flt:{},sort:{k:null,d:'asc'},pg:{c:1,pp:100},fn:''};
+const DBName='DocuLiteV8', DB={o:()=>new Promise((r,j)=>{const q=indexedDB.open(DBName,1);q.onupgradeneeded=e=>e.target.result.createObjectStore('f',{keyPath:'n'});q.onsuccess=e=>r(e.target.result);q.onerror=j}),w:async(d)=>{const db=await DB.o(),tx=db.transaction('f','readwrite');tx.objectStore('f').put(d);return new Promise(r=>tx.oncomplete=r)},g:async(n)=>{const db=await DB.o();return new Promise(r=>{const q=db.transaction('f').objectStore('f').get(n);q.onsuccess=()=>r(q.result)})},d:async(n)=>{const db=await DB.o(),tx=db.transaction('f','readwrite');tx.objectStore('f').delete(n);return new Promise(r=>tx.oncomplete=r)},l:async()=>{const db=await DB.o();return new Promise(r=>{const q=db.transaction('f').objectStore('f').getAllKeys();q.onsuccess=()=>r(q.result)})}};
+
+function init(){
+    setLang(L); lucide.createIcons(); loadHist(); renderEmpty();
+    document.getElementById('fi').addEventListener('change',HF);
+    document.addEventListener('click',e=>{if(window.pop&&!window.pop.contains(e.target)&&!e.target.closest('.flt-btn')){window.pop.remove();window.pop=null}});
+    // Detecta Ctrl+C ou Comando de Cópia
+    document.addEventListener('copy', ()=>{if(S.m==='doc'&&window.getSelection().toString().length>0)showToast()});
+}
+
+// --- LANGUAGE & TOAST ---
+function setLang(l){
+    L=l; localStorage.setItem('dl_lang',l);
+    document.querySelectorAll('.lang-opt').forEach(el=>el.classList.toggle('act',el.textContent.toLowerCase()===l));
+    document.querySelectorAll('[data-t]').forEach(el=>el.textContent=T[L][el.dataset.t]);
+    document.getElementById('si').placeholder=T[L].search;
+    document.getElementById('ld-t').textContent=T[L].load;
+    document.getElementById('md-t').textContent=T[L].detTitle;
+    document.getElementById('toast').textContent=T[L].toastCopy;
+    if(S.m==='empty')renderEmpty(); else if(S.m==='table')renderPag();
+}
+function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+// --- FILE HANDLER ---
+async function HF(e){
+    const f=e.target.files[0]; if(!f)return;
+    document.getElementById('ld').style.display='flex';
+    const ext=f.name.split('.').pop().toLowerCase();
+    try{
+        let d, tp='table';
+        if(ext==='csv'){await new Promise(r=>Papa.parse(f,{header:true,dynamicTyping:true,skipEmptyLines:true,complete:res=>{d=res.data;r()}}))}
+        else if(['xlsx','xls'].includes(ext)){const b=await f.arrayBuffer(),w=XLSX.read(b,{type:'array'});d=XLSX.utils.sheet_to_json(w.Sheets[w.SheetNames[0]],{defval:""})}
+        else if(ext.startsWith('doc')){const b=await f.arrayBuffer(),r=await mammoth.convertToHtml({arrayBuffer:b});d=r.value;tp='html'}
+        else if(ext==='pdf'){d=await f.arrayBuffer();tp='pdf'}
+        else if(['txt','json'].includes(ext)){d=await f.text();tp='text'}
+        await DB.w({n:f.name,d,t:tp});
+        tp==='table'?loadTable(d,f.name):loadDoc(d,f.name,tp); loadHist();
+    }catch(err){alert('Erro: '+err.message)}finally{document.getElementById('ld').style.display='none';e.target.value=''}
+}
+
+// --- TABLE LOGIC ---
+function loadTable(d,n){
+    S={...S,m:'table',d:d,fn:n,cols:d.length?Object.keys(d[0]):[],types:anlz(d),flt:{},q:'',pg:{c:1,pp:100}};
+    UI(n,true); proc();
+}
+function anlz(d){
+    const t={}; if(!d.length)return t;
+    Object.keys(d[0]).forEach(k=>{
+        let sc={n:0,d:0,c:0,s:0,tot:0};
+        d.slice(0,50).forEach(r=>{
+            let v=r[k]; if(v==null||v==='')return; sc.tot++;
+            if(typeof v==='number' && v>35000 && v<60000 && /data|date|venc|criado/i.test(k)){ sc.d++; return; }
+            const s=String(v).trim();
+            if(/^\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4}/.test(s)) sc.d++;
+            else if(/^R\$\s?[\d.,]+/.test(s)) sc.c++;
+            else if(!isNaN(Number(s.replace(',','.')))) sc.n++;
+            else sc.s++;
+        });
+        if(sc.d>sc.tot*0.5)t[k]='date'; else if(sc.c>sc.tot*0.5)t[k]='currency'; else if(sc.n>sc.tot*0.5)t[k]='number'; else t[k]='string';
+    });
+    return t;
+}
+function fmt(v,t){
+    if(v==null||v==='')return '<span class="t-empty">-</span>';
+    if(t==='date'){
+        if(typeof v==='number'&&v>20000){
+            const d=new Date(Math.round((v-25569)*864e5)); 
+            d.setMinutes(d.getMinutes()+d.getTimezoneOffset());
+            return d.toLocaleDateString('pt-BR');
+        }
+        const d=new Date(v); return isNaN(d)?v:d.toLocaleDateString('pt-BR');
+    }
+    if(t==='currency'){
+        const n=typeof v==='string'?parseFloat(v.replace(/[^\d,-]/g,'').replace(',','.')):v;
+        return isNaN(n)?v:n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    }
+    if(t==='number'){
+        const n=typeof v==='string'?parseFloat(v.replace(',','.')):v;
+        return isNaN(n)?v:n.toLocaleString('pt-BR');
+    }
+    return String(v);
+}
+function proc(){
+    let r=[...S.d];
+    if(S.q){const q=S.q.toLowerCase();r=r.filter(x=>Object.values(x).some(v=>String(v).toLowerCase().includes(q)))}
+    Object.keys(S.flt).forEach(k=>{if(S.flt[k].length)r=r.filter(x=>S.flt[k].includes(String(x[k])))})
+    if(S.sort.k){const{k,d}=S.sort;r.sort((a,b)=>(a[k]<b[k]?-1:1)*(d==='asc'?1:-1))}
+    S.fd=r; renderTbl(); renderPag();
+}
+function renderTbl(){
+    const c=document.getElementById('tc');
+    if(!S.fd.length){c.innerHTML='<div class="empty">Vazio</div>';return}
+    const st=(S.pg.c-1)*S.pg.pp, ed=st+S.pg.pp, dt=S.fd.slice(st,ed);
+    let h=`<table class="tbl ${S.vm}"><thead><tr>`;
+    S.cols.forEach(k=>{h+=`<th><div class="th-c"><span onclick="srt('${k}')" style="cursor:pointer">${k}</span><i data-lucide="filter" class="flt-btn ${S.flt[k]?'act':''}" onclick="flt(event,'${k}')" width="12"></i></div></th>`});
+    h+='</tr></thead><tbody>';
+    dt.forEach((r,i)=>{
+        h+=`<tr onclick="mod(${st+i})">`;
+        S.cols.forEach(k=>{
+            const t=S.types[k], v=S.vm==='modern'?fmt(r[k],t):r[k];
+            h+=`<td class="${S.vm==='modern'?(t==='number'?'t-num':t==='currency'?'t-curr':t==='date'?'t-date':''):''}">${v}</td>`;
+        });
+        h+='</tr>';
+    });
+    c.innerHTML=h+'</tbody></table>'; document.getElementById('rc').innerText=`${S.fd.length} ${T[L].rows}`; lucide.createIcons();
+}
+
+// --- DOC VIEWER ---
+function loadDoc(c,n,t){S={...S,m:'doc',c:{c,t},fn:n};UI(n,false);renderDoc();}
+async function renderDoc(){
+    const c=document.getElementById('tc'); c.innerHTML='<div class="doc-v" id="dv"></div>'; const o=document.getElementById('dv');
+    const {c:ct,t}=S.c;
+    if(t==='html'){const p=document.createElement('div');p.className='page doc-content';p.innerHTML=ct;o.appendChild(p)}
+    else if(t==='text'){const p=document.createElement('div');p.className='page doc-content txt-mode';p.textContent=ct;o.appendChild(p)}
+    else if(t==='pdf'){
+        try{
+            const pdf=await pdfjsLib.getDocument(ct).promise;
+            for(let i=1;i<=pdf.numPages;i++){
+                const p=await pdf.getPage(i), vp=p.getViewport({scale:1.3});
+                const d=document.createElement('div');d.className='page pdf-w';d.style.width=`${vp.width}px`;d.style.height=`${vp.height}px`;
+                const cv=document.createElement('canvas');cv.className='pdf-c';cv.height=vp.height;cv.width=vp.width;
+                const tl=document.createElement('div');tl.className='txt-l';
+                d.append(tl,cv); o.appendChild(d);
+                await p.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+                pdfjsLib.renderTextLayer({textContentSource:await p.getTextContent(),container:tl,viewport:vp,textDivs:[]});
+            }
+        }catch(e){o.innerHTML=`<p>Erro PDF: ${e.message}</p>`}
+    }
+}
+
+// --- UTILS ---
+function flt(e,k){
+    e.stopPropagation(); if(window.pop)window.pop.remove();
+    const u=[...new Set(S.d.map(r=>String(r[k])))].sort().slice(0,500), act=S.flt[k]||[];
+    const p=document.createElement('div'); p.className='flt-pn';
+    p.style.left=(e.clientX-180)+'px'; p.style.top=(e.clientY+10)+'px';
+    p.innerHTML=`<input id="fs" placeholder="Filtrar..."><div id="fl" class="flt-ls"></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:0.75rem"><button onclick="af('${k}',1)" style="color:#ef4444;background:none;border:none;cursor:pointer">Limpar</button><button onclick="af('${k}',0)" style="color:#2563eb;background:none;border:none;cursor:pointer;font-weight:700">Filtrar</button></div>`;
+    document.body.appendChild(p); window.pop=p;
+    const l=p.querySelector('#fl'), s=p.querySelector('#fs');
+    const rL=(tx)=>{l.innerHTML='';u.filter(v=>v.toLowerCase().includes(tx.toLowerCase())).forEach(v=>{l.innerHTML+=`<label class="flt-row"><input type="checkbox" value="${v}" ${!act.length||act.includes(v)?'checked':''}> ${v}</label>`})};
+    rL(''); s.oninput=e=>rL(e.target.value); s.onclick=e=>e.stopPropagation();
+}
+window.af=(k,c)=>{if(c)delete S.flt[k];else{const ch=[...window.pop.querySelectorAll('input:checked')].map(i=>i.value);if(ch.length!==window.pop.querySelectorAll('input').length)S.flt[k]=ch;else delete S.flt[k]}window.pop.remove();window.pop=null;S.pg.c=1;proc()};
+function mod(i){
+    const r=S.fd[i], b=document.getElementById('md'); b.innerHTML='';
+    Object.keys(r).forEach(k=>{
+        let v=S.vm==='modern'?fmt(r[k],S.types[k]):r[k];
+        if(/http/.test(String(r[k])))v=`<a href="${r[k]}" target="_blank" class="lnk">Abrir Link</a>`;
+        b.innerHTML+=`<div class="mod-i"><span class="mod-l">${k}</span><span class="mod-v">${v}</span></div>`;
+    });
+    document.getElementById('mo').classList.add('open');
+}
+function closeModal(){document.getElementById('mo').classList.remove('open')}
+function renderPag(){const t=S.fd.length,p=S.pg.pp,mx=Math.ceil(t/p),c=S.pg.c;document.getElementById('pg').innerHTML=`<span>${t>0?(c-1)*p+1:0}-${Math.min(c*p,t)} de ${t}</span><div style="display:flex;gap:5px"><button onclick="pg(${c-1})" ${c<=1?'disabled':''}><i data-lucide="chevron-left" width="14"></i></button><span style="padding:0 5px;display:flex;align-items:center">${c}</span><button onclick="pg(${c+1})" ${c>=mx?'disabled':''}><i data-lucide="chevron-right" width="14"></i></button></div>`;lucide.createIcons()}
+function pg(n){S.pg.c=n;renderTbl();renderPag()}
+function srt(k){S.sort={k,d:S.sort.k===k&&S.sort.d==='asc'?'desc':'asc'};proc()}
+function search(v){S.q=v;S.pg.c=1;proc()}
+function setView(m){S.vm=m;if(S.m==='table')renderTbl();document.getElementById('bm').className=m==='modern'?'nav-l act':'nav-l';document.getElementById('be').className=m==='excel'?'nav-l act':'nav-l'}
+function toggleSb(){document.getElementById('sb').classList.toggle('c');lucide.createIcons()}
+function UI(n,tm){document.getElementById('pt').innerText=n;document.getElementById('ht').style.display=tm?'flex':'none';document.getElementById('pg').style.display=tm?'flex':'none';document.getElementById('tc').className='ctn'}
+function renderEmpty(){document.getElementById('tc').innerHTML=`<div class="empty"><div style="background:#f1f5f9;padding:15px;border-radius:50%;margin-bottom:15px"><i data-lucide="folder-open" width="32" style="color:#94a3b8"></i></div><h3 style="margin:0 0 5px;color:#1e293b">${T[L].empty}</h3><button onclick="document.getElementById('fi').click()" style="background:var(--c-p);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;margin-top:10px">${T[L].impBtn}</button></div>`;UI(T[L].home,false);lucide.createIcons()}
+
+// --- HISTÓRICO ---
+async function loadHist(){
+    const c=document.getElementById('hl'), ks=await DB.l(); c.innerHTML='';
+    if(!ks.length){c.innerHTML='<div style="padding:15px;text-align:center;font-size:0.8rem;color:#64748b">Vazio</div>';return}
+    ks.reverse().forEach(n=>{
+        const d=document.createElement('div');d.className='hist';
+        d.innerHTML=`<div class="hist-l"><i data-lucide="file" width="14" style="flex-shrink:0"></i><span class="fn">${n}</span></div><div class="hist-del"><i data-lucide="trash-2" width="14"></i></div>`;
+        d.onclick=()=>oh(n); d.querySelector('.hist-del').onclick=e=>{e.stopPropagation();dh(n)};
+        c.appendChild(d);
+    }); lucide.createIcons();
+}
+async function oh(n){document.getElementById('ld').style.display='flex';try{const f=await DB.g(n);f?(f.t==='table'?loadTable(f.d,f.n):loadDoc(f.d,f.n,f.t)):(alert('Erro'),loadHist())}catch(e){}finally{document.getElementById('ld').style.display='none'}}
+async function dh(n){if(confirm('Excluir?')){await DB.d(n);loadHist();if(S.fn===n)renderEmpty()}}
+
+init();
+</script>
+</body>
+</html>
