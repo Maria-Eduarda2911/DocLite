@@ -1,4 +1,4 @@
-# ⚡ DocuLite 
+# ⚡ DocLite 
 
 > **Universal file viewer 100% offline, secure, and lightweight.**
 
