@@ -11,22 +11,62 @@
 
 <style>
 /* --- CORE CSS --- */
-:root{--w-sb:240px;--w-sb-c:64px;--h-hd:56px;--c-p:#2563eb;--bg:#f8fafc;--txt:#1e293b;--gry:#64748b;--brd:#e2e8f0}
+/* Ajuste: --w-sb-c reduzido para 56px (mais compacto) */
+:root{--w-sb:240px;--w-sb-c:56px;--h-hd:56px;--c-p:#2563eb;--bg:#f8fafc;--txt:#1e293b;--gry:#64748b;--brd:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-size:0.85rem}
 .app{display:flex;height:100vh}.main{flex:1;display:flex;flex-direction:column;background:#fff;overflow:hidden}
 
 /* --- SIDEBAR & LANG --- */
 .sb{width:var(--w-sb);background:#0f172a;color:#cbd5e1;display:flex;flex-direction:column;transition:.3s ease;z-index:20;flex-shrink:0;border-right:1px solid #1e293b}
+/* Hide elements when collapsed */
 .sb.c{width:var(--w-sb-c)}.sb.c :is(.brand span,.nav-t,.nav-l span,.hist .fn,.hist-del,.lang-sw){display:none}
-.brand-wrap{height:var(--h-hd);border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem}
-.brand{display:flex;align-items:center;font-weight:700;font-size:1rem;color:#fff;gap:10px}
-.sb.c .brand-wrap{justify-content:center;padding:0}
+
+.brand-wrap{height:var(--h-hd);border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 1rem; transition: padding .3s}
+.brand{display:flex;align-items:center;font-weight:700;font-size:1rem;color:#fff;gap:12px; transition: gap .3s}
+
+/* COLLAPSED STATE ALIGNMENT FIXES */
+.sb.c .brand-wrap{justify-content:center; padding:0;} /* Remove padding to center perfectly */
+.sb.c .brand {gap: 0; justify-content: center;} /* Remove gap so icon is centered */
+
+/* Icon Containers */
+.brand-box{
+    width: 32px; height: 32px; 
+    background: #3b82f6; 
+    border-radius: 6px; 
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.icon-box {
+    width: 32px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
 .lang-sw{display:flex;gap:4px;font-size:0.75rem;font-weight:600}
 .lang-opt{cursor:pointer;padding:2px 4px;border-radius:4px;color:#64748b;transition:.2s}.lang-opt:hover{color:#fff} .lang-opt.act{background:#3b82f6;color:#fff}
-.nav-t{padding:1.5rem 1.25rem 0.5rem;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em}
-.nav-l{color:#94a3b8;padding:.65rem 1.25rem;display:flex;gap:10px;cursor:pointer;border-left:3px solid transparent;transition:.2s;align-items:center;font-size:0.85rem}
+
+.nav-t{padding:1.5rem 1rem 0.5rem;font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em; white-space:nowrap; overflow:hidden}
+.nav-l{color:#94a3b8;padding:.65rem 1rem;display:flex;gap:12px;cursor:pointer;border-left:3px solid transparent;transition:.2s;align-items:center;font-size:0.85rem}
 .nav-l:hover{background:#1e293b;color:#fff}.nav-l.act{background:#1e293b;border-left-color:var(--c-p);color:#fff}
-.sb.c .nav-l{justify-content:center;padding:.75rem 0}
+
+/* Collapsed Nav Item Alignment */
+.sb.c .nav-l{
+    justify-content:center; 
+    padding:.75rem 0; /* Vertical padding only, horiz 0 to force center */
+    border-left: 3px solid transparent; /* Keep border logic but hidden visually if centered? No, keep it. */
+}
+.sb.c .nav-l.act {
+    border-left-color: transparent; /* Optional: hide left border in collapsed mode if it looks weird, or keep it */
+    background: #1e293b;
+    position: relative;
+}
+/* Optional: Add a dot or small indicator for collapsed active state instead of left border */
+.sb.c .nav-l.act::after {
+    content:''; position:absolute; right:4px; top:50%; transform:translateY(-50%);
+    width:4px; height:4px; background:var(--c-p); border-radius:50%;
+}
+
+
 .hist-box{flex:1;overflow-y:auto;overflow-x:hidden}
 .hist{padding:8px 12px 8px 16px;display:flex;align-items:center;justify-content:space-between;color:#94a3b8;cursor:pointer;border-bottom:1px solid #1e293b;transition:.2s;font-size:0.8rem}
 .hist:hover{background:#1e293b;color:#e2e8f0}
@@ -39,7 +79,7 @@
 .head{height:var(--h-hd);border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;padding:0 1.5rem;background:#fff}
 .sch{position:relative;color:#64748b}
 .sch i{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px}
-.sch input{padding:8px 12px 8px 34px;border:1px solid #e2e8f0;border-radius:6px;width:300px;outline:none;font-size:0.85rem;color:#1e293b;transition:border-color .2s}
+.sch input{padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;width:300px;outline:none;font-size:0.85rem;color:#1e293b;transition:border-color .2s}
 .sch input:focus{border-color:var(--c-p)}
 
 /* --- TABLE --- */
@@ -47,22 +87,21 @@
 table.tbl{width:100%;border-spacing:0;background:#fff;border-collapse:collapse}
 th{position:sticky;top:0;z-index:10;background:#f8fafc;padding:8px 12px;border-bottom:1px solid #cbd5e1;color:#475569;font-size:.7rem;text-transform:uppercase;font-weight:700;text-align:left;white-space:nowrap;user-select:none}
 td{padding:6px 12px;border-bottom:1px solid #e2e8f0;color:#334155;white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis;font-size:0.8rem;height:34px}
-tr:nth-child(even) td { background-color: #f8fafc; } tr:hover td{background-color:#e2e8f0!important; cursor:default}
+tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
+
 .t-num{text-align:right;font-family:'Segoe UI',sans-serif} .t-date{text-align:center;color:#64748b;font-variant-numeric:tabular-nums} .t-curr{text-align:right;color:#059669;font-weight:600} .t-empty{color:#cbd5e1;text-align:center}
 .tbl.excel th,.tbl.excel td{padding:2px 6px;border:1px solid #cbd5e1;font-family:'Segoe UI',sans-serif;font-size:.75rem;height:22px;background:none} .tbl.excel th{background:#f1f5f9;text-transform:none}
+.t-bool{text-align:center;font-weight:600}
 
-/* --- DOC VIEWER (FIXED SELECTION) --- */
+/* --- DOC VIEWER --- */
 .doc-v{padding:30px;background:#e2e8f0;min-height:100%;display:flex;flex-direction:column;align-items:center;gap:20px}
 .page{background:#fff;width:100%;max-width:800px;min-height:1000px;padding:50px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);color:#0f172a;line-height:1.6;position:relative}
-/* Correção DOCX: Remove fundos e garante seleção nativa */
 .doc-content * { background: transparent !important; box-shadow: none !important; color: inherit !important; }
 .doc-content p { margin-bottom: 0.8em; }
-/* Correção PDF: TextLayer transparente sobre o canvas */
 .pdf-w{padding:0!important;height:auto!important;position:relative}
 .pdf-c{display:block;width:100%}
 .txt-l{position:absolute;inset:0;line-height:1;opacity:1;mix-blend-mode:multiply;pointer-events:auto}
 .txt-l span{color:transparent;cursor:text}
-/* Estilo de seleção global limpo */
 ::selection { background: rgba(37, 99, 235, 0.3) !important; color: inherit !important; }
 
 /* --- UI & TOAST --- */
@@ -72,15 +111,32 @@ tr:nth-child(even) td { background-color: #f8fafc; } tr:hover td{background-colo
 .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gry)}
 .load{position:fixed;inset:0;background:rgba(255,255,255,0.9);z-index:99;display:none;align-items:center;justify-content:center;flex-direction:column}
 .spin{width:30px;height:30px;border:3px solid #e2e8f0;border-top-color:var(--c-p);border-radius:50%;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
-/* Toast Notification */
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:30px;font-size:0.85rem;font-weight:500;opacity:0;transition:.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);pointer-events:none;z-index:1000;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
 .toast.show{opacity:1;bottom:40px}
-/* Modals & Filters */
-.th-c{display:flex;justify-content:space-between;align-items:center;gap:6px}
-.flt-btn{padding:2px;border-radius:3px;cursor:pointer;color:#cbd5e1;transition:.2s} .flt-btn:hover, .flt-btn.act{color:var(--c-p);background:#eff6ff}
-.flt-pn{position:absolute;background:#fff;border:1px solid #cbd5e1;padding:8px;border-radius:6px;box-shadow:0 10px 20px -5px rgba(0,0,0,0.15);width:200px;z-index:100;display:flex;flex-direction:column;gap:8px}
-.flt-ls{max-height:180px;overflow-y:auto;border:1px solid #f1f5f9;border-radius:4px;padding:2px}
-.flt-row{display:flex;gap:6px;padding:3px 6px;font-size:0.8rem;cursor:pointer;align-items:center} .flt-row:hover{background:#f8fafc}
+
+/* --- FILTERS & HIGHLIGHTS --- */
+.flt-btn{cursor:pointer;transition:.2s;color:#94a3b8;display:flex;align-items:center;padding:2px;border-radius:4px}.flt-btn:hover,.flt-btn.act{background:#dbeafe;color:#2563eb}
+.flt-pop{position:absolute;background:#fff;border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);z-index:30;width:240px;font-size:.8rem;user-select:none;color:#334155;display:flex;flex-direction:column}
+.flt-h{padding:8px 12px;border-bottom:1px solid #e2e8f0}.flt-h input{width:100%;padding:6px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:.75rem}
+.flt-c{max-height:200px;overflow-y:auto;padding:4px}
+.flt-i{display:block;padding:6px 10px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.flt-i:hover{background:#f1f5f9}
+.flt-i label{display:flex;align-items:center;gap:6px;font-weight:400;text-transform:none}
+.flt-i input{margin-right:6px}
+.flt-f{padding:8px 12px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;background:#f8fafc;flex-wrap:wrap;gap:8px}
+.flt-f button{background:#fff;border:1px solid #cbd5e1;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:.75rem;font-weight:600}
+.flt-f button.pri{background:var(--c-p);color:#fff;border-color:var(--c-p)}
+
+/* Color Palette */
+.clr-sec{width:100%;padding-top:4px;border-top:1px solid #e2e8f0;margin-top:4px}
+.clr-lbl{font-size:.7rem;color:#64748b;margin-bottom:4px;display:block;padding:0 12px}
+.clr-row{display:flex;gap:8px;justify-content:center;padding:0 12px 8px}
+.clr-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:1px solid rgba(0,0,0,0.1);transition:.2s;display:flex;align-items:center;justify-content:center}
+.clr-dot:hover{transform:scale(1.1);border-color:#94a3b8}
+.clr-dot.red{background:#fecaca}.clr-dot.grn{background:#bbf7d0}.clr-dot.blu{background:#bfdbfe}.clr-dot.yel{background:#fef08a}
+.clr-dot.clr{background:#f1f5f9;color:#ef4444;font-size:10px}
+
+/* Modals */
+.th-c{display:flex;justify-content:space-between;align-items:center;gap:6px; width: 100%}
 .mod-ov{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:50;display:none;align-items:center;justify-content:center} .mod-ov.open{display:flex}
 .mod-bx{background:#fff;width:90%;max-width:600px;border-radius:8px;padding:20px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
 .mod-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
@@ -110,7 +166,9 @@ tr:nth-child(even) td { background-color: #f8fafc; } tr:hover td{background-colo
     <aside class="sb" id="sb">
         <div class="brand-wrap">
             <div class="brand">
-                <div style="background:#3b82f6;padding:4px;border-radius:4px;display:flex"><i data-lucide="table-2" class="text-white" width="16" style="color:white"></i></div>
+                <div class="brand-box">
+                    <i data-lucide="table-2" class="text-white" width="20" style="color:white"></i>
+                </div>
                 <span>DocLite</span>
             </div>
             <div class="lang-sw">
@@ -121,11 +179,22 @@ tr:nth-child(even) td { background-color: #f8fafc; } tr:hover td{background-colo
         </div>
         <div class="hist-box">
             <div class="nav-t" data-t="view">Visualização</div>
-            <div class="nav-l act" id="bm" onclick="setView('modern')"><i data-lucide="layout-list" width="16"></i><span data-t="list">Lista</span></div>
-            <div class="nav-l" id="be" onclick="setView('excel')"><i data-lucide="grid-3x3" width="16"></i><span data-t="grid">Grade</span></div>
+            
+            <div class="nav-l act" id="bm" onclick="setView('modern')">
+                <div class="icon-box"><i data-lucide="layout-list" width="18"></i></div>
+                <span data-t="list">Lista</span>
+            </div>
+            
+            <div class="nav-l" id="be" onclick="setView('excel')">
+                <div class="icon-box"><i data-lucide="grid-3x3" width="18"></i></div>
+                <span data-t="grid">Grade</span>
+            </div>
             
             <div class="nav-t" data-t="actions">Ações</div>
-            <div class="nav-l" onclick="document.getElementById('fi').click()"><i data-lucide="folder-plus" width="16" style="color:#60a5fa"></i><span style="color:#fff" data-t="open">Abrir Arquivo</span></div>
+            <div class="nav-l" onclick="document.getElementById('fi').click()">
+                <div class="icon-box"><i data-lucide="folder-plus" width="18" style="color:#60a5fa"></i></div>
+                <span style="color:#fff" data-t="open">Abrir Arquivo</span>
+            </div>
             
             <div class="nav-t" data-t="recent">Recentes</div>
             <div id="hl"></div>
@@ -138,7 +207,6 @@ tr:nth-child(even) td { background-color: #f8fafc; } tr:hover td{background-colo
             <h3 id="pt" style="margin:0;color:#1e293b;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px">Início</h3>
             <div id="ht" style="display:flex;gap:10px;align-items:center">
                 <div class="sch">
-                    <i data-lucide="search"></i>
                     <input id="si" oninput="search(this.value)" placeholder="Filtrar dados...">
                 </div>
                 <span id="rc" style="font-size:.7rem;color:var(--gry);background:#f1f5f9;padding:2px 6px;border-radius:4px;border:1px solid #e2e8f0"></span>
@@ -151,18 +219,19 @@ tr:nth-child(even) td { background-color: #f8fafc; } tr:hover td{background-colo
 
 <script>
 // --- TRANSLATION ---
-const T={pt:{view:"Visualização",list:"Lista",grid:"Grade",actions:"Ações",open:"Abrir Arquivo",recent:"Recentes",empty:"Nenhum arquivo",home:"Início",search:"Filtrar dados...",rows:"linhas",load:"Lendo arquivo...",detTitle:"Detalhes",toastCopy:"Texto copiado!",impBtn:"Importar"},en:{view:"View Mode",list:"List",grid:"Grid",actions:"Actions",open:"Open File",recent:"Recent",empty:"No file open",home:"Home",search:"Search data...",rows:"rows",load:"Reading file...",detTitle:"Details",toastCopy:"Text copied!",impBtn:"Import"}};
+const T={pt:{view:"Visualização",list:"Lista",grid:"Grade",actions:"Ações",open:"Abrir Arquivo",recent:"Recentes",empty:"Nenhum arquivo",home:"Início",search:"Filtrar dados...",rows:"linhas",load:"Lendo arquivo...",detTitle:"Detalhes",toastCopy:"Texto copiado!",impBtn:"Importar",hlt:"Destacar cor",yes:"Sim",no:"Não"},en:{view:"View Mode",list:"List",grid:"Grid",actions:"Actions",open:"Open File",recent:"Recent",empty:"No file open",home:"Home",search:"Search data...",rows:"rows",load:"Reading file...",detTitle:"Details",toastCopy:"Text copied!",impBtn:"Import",hlt:"Highlight",yes:"Yes",no:"No"}};
 let L=localStorage.getItem('dl_lang')||'pt';
+const EMPTY_VAL = '(vazio)';
 
 // --- CORE ---
-let S={d:[],m:'empty',c:null,fd:[],cols:[],types:{},vm:'modern',q:'',flt:{},sort:{k:null,d:'asc'},pg:{c:1,pp:100},fn:''};
+// Highlights now stores an array of rules per column: { colName: [ {vals:[], color:''}, ... ] }
+let S={d:[],m:'empty',c:null,fd:[],cols:[],types:{},vm:'modern',q:'',sort:{k:null,d:'asc'},pg:{c:1,pp:100},fn:'',filters:{},filterData:{},highlights:{}};
 const DBName='DocuLiteV8', DB={o:()=>new Promise((r,j)=>{const q=indexedDB.open(DBName,1);q.onupgradeneeded=e=>e.target.result.createObjectStore('f',{keyPath:'n'});q.onsuccess=e=>r(e.target.result);q.onerror=j}),w:async(d)=>{const db=await DB.o(),tx=db.transaction('f','readwrite');tx.objectStore('f').put(d);return new Promise(r=>tx.oncomplete=r)},g:async(n)=>{const db=await DB.o();return new Promise(r=>{const q=db.transaction('f').objectStore('f').get(n);q.onsuccess=()=>r(q.result)})},d:async(n)=>{const db=await DB.o(),tx=db.transaction('f','readwrite');tx.objectStore('f').delete(n);return new Promise(r=>tx.oncomplete=r)},l:async()=>{const db=await DB.o();return new Promise(r=>{const q=db.transaction('f').objectStore('f').getAllKeys();q.onsuccess=()=>r(q.result)})}};
 
 function init(){
     setLang(L); lucide.createIcons(); loadHist(); renderEmpty();
     document.getElementById('fi').addEventListener('change',HF);
     document.addEventListener('click',e=>{if(window.pop&&!window.pop.contains(e.target)&&!e.target.closest('.flt-btn')){window.pop.remove();window.pop=null}});
-    // Detecta Ctrl+C ou Comando de Cópia
     document.addEventListener('copy', ()=>{if(S.m==='doc'&&window.getSelection().toString().length>0)showToast()});
 }
 
@@ -198,33 +267,86 @@ async function HF(e){
 
 // --- TABLE LOGIC ---
 function loadTable(d,n){
-    S={...S,m:'table',d:d,fn:n,cols:d.length?Object.keys(d[0]):[],types:anlz(d),flt:{},q:'',pg:{c:1,pp:100}};
+    // Reset highlights/filters on new load
+    S={...S,m:'table',d:d,fn:n,cols:d.length?Object.keys(d[0]):[],types:anlz(d),q:'',pg:{c:1,pp:100},filters:{},filterData:{},highlights:{}};
     UI(n,true); proc();
 }
-function anlz(d){
-    const t={}; if(!d.length)return t;
-    Object.keys(d[0]).forEach(k=>{
-        let sc={n:0,d:0,c:0,s:0,tot:0};
-        d.slice(0,50).forEach(r=>{
-            let v=r[k]; if(v==null||v==='')return; sc.tot++;
-            if(typeof v==='number' && v>35000 && v<60000 && /data|date|venc|criado/i.test(k)){ sc.d++; return; }
-            const s=String(v).trim();
-            if(/^\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4}/.test(s)) sc.d++;
-            else if(/^R\$\s?[\d.,]+/.test(s)) sc.c++;
-            else if(!isNaN(Number(s.replace(',','.')))) sc.n++;
+function anlz(d) {
+    const t = {};
+    if (!d.length) return t;
+    Object.keys(d[0]).forEach(k => {
+        let sc = { n: 0, d: 0, c: 0, s: 0, b: 0, tot: 0 };
+        d.slice(0, 50).forEach(r => {
+            let v = r[k];
+            if (v === null || v === '') return;
+            sc.tot++;
+            const s = String(v).trim().toLowerCase();
+            
+            // Boolean Detection
+            if (v === true || v === false || s === 'true' || s === 'false' || v === 1 || v === 0) {
+                if (typeof v === 'number' && (v === 1 || v === 0)) {
+                    sc.b++;
+                } else if (typeof v === 'boolean' || s === 'true' || s === 'false') {
+                    sc.b++;
+                }
+            }
+
+            let isExcelDate = false, potentialNumber;
+            if (typeof v === 'number') potentialNumber = v;
+            else if (typeof v === 'string' && s.includes(',')) {
+                const n = parseFloat(s.replace(/\./g, '').replace(',', '.'));
+                if (!isNaN(n)) potentialNumber = n;
+            }
+            
+            // Strict Excel Date Check (Must be > 20000 to avoid confusing 0/1 with dates)
+            if (potentialNumber && potentialNumber > 20000 && potentialNumber < 100000) isExcelDate = true;
+            
+            if (isExcelDate) { sc.d++; return; }
+            
+            // Header based date check, BUT ignore small integers (0/1)
+            if (/data|date|venc|criado|atuali/i.test(k)) {
+                 if (!isNaN(new Date(v)) && !(potentialNumber >= 0 && potentialNumber <= 1)) {
+                     sc.d++; return;
+                 }
+            }
+
+            if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(.\d+)?Z?)?$/.test(s) || /^\d{2}\/\d{2}\/\d{4}$/.test(s)) sc.d++;
+            else if (/^R\$\s?[\d.,]+/.test(s)) sc.c++;
+            else if (!isNaN(Number(s.replace(',', '.')))) sc.n++;
             else sc.s++;
         });
-        if(sc.d>sc.tot*0.5)t[k]='date'; else if(sc.c>sc.tot*0.5)t[k]='currency'; else if(sc.n>sc.tot*0.5)t[k]='number'; else t[k]='string';
+
+        // Priority logic
+        if (sc.b > sc.tot * 0.9) t[k] = 'bool'; // High confidence boolean
+        else if (sc.d > sc.tot * 0.5) t[k] = 'date';
+        else if (sc.c > sc.tot * 0.5) t[k] = 'currency';
+        else if (sc.n > sc.tot * 0.5) t[k] = 'number';
+        else t[k] = 'string';
     });
     return t;
 }
+
 function fmt(v,t){
     if(v==null||v==='')return '<span class="t-empty">-</span>';
+    
+    if(t==='bool') {
+        const s = String(v).toLowerCase();
+        if (v === true || v === 1 || s === 'true') return `<span style="color:#16a34a;font-weight:600">${T[L].yes}</span>`;
+        if (v === false || v === 0 || s === 'false') return `<span style="color:#dc2626;font-weight:600">${T[L].no}</span>`;
+        return v;
+    }
+
     if(t==='date'){
-        if(typeof v==='number'&&v>20000){
-            const d=new Date(Math.round((v-25569)*864e5)); 
+        let excelDateNum = null;
+        if(typeof v === 'number') excelDateNum = v;
+        else if (typeof v === 'string' && v.includes(',')) {
+            const n = parseFloat(v.replace(/\./g, '').replace(',', '.'));
+            if (!isNaN(n)) excelDateNum = n;
+        }
+        if(excelDateNum && excelDateNum > 20000 && excelDateNum < 100000){
+            const d=new Date(Math.round((excelDateNum-25569)*864e5));
             d.setMinutes(d.getMinutes()+d.getTimezoneOffset());
-            return d.toLocaleDateString('pt-BR');
+            return d.toLocaleDateString('pt-BR') + (excelDateNum % 1 !== 0 ? ' ' + d.toLocaleTimeString('pt-BR') : '');
         }
         const d=new Date(v); return isNaN(d)?v:d.toLocaleDateString('pt-BR');
     }
@@ -238,29 +360,237 @@ function fmt(v,t){
     }
     return String(v);
 }
+
 function proc(){
     let r=[...S.d];
     if(S.q){const q=S.q.toLowerCase();r=r.filter(x=>Object.values(x).some(v=>String(v).toLowerCase().includes(q)))}
-    Object.keys(S.flt).forEach(k=>{if(S.flt[k].length)r=r.filter(x=>S.flt[k].includes(String(x[k])))})
+    const actFilterKeys = Object.keys(S.filters);
+    if (actFilterKeys.length > 0) {
+        r = r.filter(row => {
+            return actFilterKeys.every(col => {
+                const filterValues = S.filters[col];
+                if (filterValues === undefined) return true;
+                if (filterValues.length === 0) return true; 
+                
+                let val = row[col];
+                if (val === null || val === '') val = EMPTY_VAL;
+                else {
+                     const t = S.types[col];
+                     if (S.vm === 'modern' || t === 'date' || t === 'bool') val = fmt(val, t).replace(/<[^>]*>?/gm, ''); // Strip HTML for filter comparison
+                     else val = String(val);
+                }
+                
+                return filterValues.includes(val);
+            });
+        });
+    }
     if(S.sort.k){const{k,d}=S.sort;r.sort((a,b)=>(a[k]<b[k]?-1:1)*(d==='asc'?1:-1))}
     S.fd=r; renderTbl(); renderPag();
 }
+
 function renderTbl(){
     const c=document.getElementById('tc');
     if(!S.fd.length){c.innerHTML='<div class="empty">Vazio</div>';return}
     const st=(S.pg.c-1)*S.pg.pp, ed=st+S.pg.pp, dt=S.fd.slice(st,ed);
     let h=`<table class="tbl ${S.vm}"><thead><tr>`;
-    S.cols.forEach(k=>{h+=`<th><div class="th-c"><span onclick="srt('${k}')" style="cursor:pointer">${k}</span><i data-lucide="filter" class="flt-btn ${S.flt[k]?'act':''}" onclick="flt(event,'${k}')" width="12"></i></div></th>`});
+    S.cols.forEach(k=>{
+        const hasFlt = S.filters[k] !== undefined;
+        // Check if column has any highlight rules defined
+        const hasHlt = S.highlights[k] && S.highlights[k].length > 0;
+        h+=`<th><div class="th-c"><span onclick="srt('${k}')" style="cursor:pointer">${k}</span><i data-lucide="filter" class="flt-btn ${(hasFlt||hasHlt) ? 'act' : ''}" width="14" height="14" onclick="openFilter(event, '${k}')" style="${hasHlt ? 'color:#ec4899' : ''}"></i></div></th>`
+    });
     h+='</tr></thead><tbody>';
+    
     dt.forEach((r,i)=>{
-        h+=`<tr onclick="mod(${st+i})">`;
+        let rowBg = '';
+        const activeCols = Object.keys(S.highlights);
+        
+        // Outer loop: iterate through columns with highlights
+        outerLoop:
+        if (activeCols.length > 0) {
+            for (const col of activeCols) {
+                const rulesArray = S.highlights[col]; // Get array of rules for this column
+
+                // Prepare value for comparison
+                let val = r[col];
+                if (val === null || val === '') val = EMPTY_VAL;
+                else {
+                    const t = S.types[col];
+                    // Must match the format used in the filter list and applyHighlight
+                    if (S.vm === 'modern' || t === 'date' || t === 'bool') val = fmt(val, t).replace(/<[^>]*>?/gm, '');
+                    else val = String(val);
+                }
+
+                // Inner loop: check against all rules for this column
+                for (const rule of rulesArray) {
+                    if (rule.vals.includes(val)) {
+                        rowBg = rule.color;
+                        // Stop searching rules once a match is found for this row
+                        break outerLoop; 
+                    }
+                }
+            }
+        }
+
+        h+=`<tr onclick="mod(${st+i})" style="${rowBg ? 'background-color:'+rowBg : ''}">`;
         S.cols.forEach(k=>{
-            const t=S.types[k], v=S.vm==='modern'?fmt(r[k],t):r[k];
-            h+=`<td class="${S.vm==='modern'?(t==='number'?'t-num':t==='currency'?'t-curr':t==='date'?'t-date':''):''}">${v}</td>`;
+            const t=S.types[k];
+            let v = r[k];
+            if (S.vm === 'modern' || t === 'date' || t === 'bool') v = fmt(r[k], t);
+            h+=`<td class="${S.vm==='modern'?(t==='number'?'t-num':t==='currency'?'t-curr':t==='date'?'t-date':t==='bool'?'t-bool':''):''}">${v}</td>`;
         });
         h+='</tr>';
     });
     c.innerHTML=h+'</tbody></table>'; document.getElementById('rc').innerText=`${S.fd.length} ${T[L].rows}`; lucide.createIcons();
+}
+
+function openFilter(e, key) {
+    e.stopPropagation();
+    if (window.pop) { window.pop.remove(); window.pop = null; }
+    
+    const btn = e.target.closest('.flt-btn');
+    if (!S.filterData[key]) {
+        const type = S.types[key];
+        const unique = new Set(S.d.map(r => {
+            if (r[key] === null || r[key] === '') return EMPTY_VAL;
+            let val = r[key];
+            if (S.vm === 'modern' || type === 'date' || type === 'bool') {
+                 // Format and strip HTML for filter list
+                 return fmt(val, type).replace(/<[^>]*>?/gm, '');
+            }
+            return String(val);
+        }));
+        S.filterData[key] = [...unique].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    }
+    const values = S.filterData[key];
+    const activeFilters = S.filters[key];
+
+    const pop = document.createElement('div');
+    pop.className = 'flt-pop';
+    pop.onclick = e => e.stopPropagation();
+    
+    let listItems = values.map(v => {
+        const isChecked = activeFilters === undefined || activeFilters.includes(v);
+        return `
+        <div class="flt-i">
+            <label><input type="checkbox" class="flt-val" value="${v.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}>${v}</label>
+        </div>
+    `}).join('');
+
+    pop.innerHTML = `
+        <div class="flt-h">
+            <input type="text" placeholder="Buscar..." oninput="searchFilter(this)">
+        </div>
+        <div class="flt-c">
+            <div class="flt-i"><label><input type="checkbox" onchange="toggleSelectAll(this)"><b>(Todos)</b></label></div>
+            ${listItems}
+        </div>
+        <div class="flt-f">
+            <button onclick="applyFilter('${key}')" class="pri">OK</button>
+            <button onclick="window.pop.remove()">X</button>
+        </div>
+        <div class="clr-sec">
+            <span class="clr-lbl">${T[L].hlt}</span>
+            <div class="clr-row">
+                <div class="clr-dot grn" onclick="applyHighlight('${key}', '#bbf7d0')"></div>
+                <div class="clr-dot blu" onclick="applyHighlight('${key}', '#bfdbfe')"></div>
+                <div class="clr-dot red" onclick="applyHighlight('${key}', '#fecaca')"></div>
+                <div class="clr-dot yel" onclick="applyHighlight('${key}', '#fef08a')"></div>
+                <div class="clr-dot clr" onclick="applyHighlight('${key}', null)"><i data-lucide="x" width="12"></i></div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(pop);
+    const rect = btn.getBoundingClientRect();
+    pop.style.left = `${rect.left}px`;
+    pop.style.top = `${rect.bottom + 4}px`;
+    window.pop = pop;
+    lucide.createIcons();
+    updateSelectAllCheckbox();
+    pop.querySelector('input[type="text"]').focus();
+}
+
+function searchFilter(input) {
+    const query = input.value.toLowerCase();
+    const container = input.closest('.flt-pop').querySelector('.flt-c');
+    container.querySelectorAll('.flt-i').forEach((item, index) => {
+        if (index === 0) return;
+        const label = item.querySelector('label').textContent;
+        item.style.display = label.toLowerCase().includes(query) ? '' : 'none';
+    });
+    updateSelectAllCheckbox();
+}
+
+function toggleSelectAll(checkbox) {
+    const container = checkbox.closest('.flt-c');
+    const isChecked = checkbox.checked;
+    container.querySelectorAll('.flt-val').forEach(cb => {
+        if (cb.closest('.flt-i').style.display !== 'none') cb.checked = isChecked;
+    });
+    updateSelectAllCheckbox();
+}
+
+function applyFilter(key) {
+    if (!window.pop) return;
+    const selected = [];
+    window.pop.querySelectorAll('.flt-val:checked').forEach(cb => selected.push(cb.value));
+    
+    if (selected.length === 0 || selected.length === S.filterData[key].length) {
+        delete S.filters[key];
+    } else {
+        S.filters[key] = selected;
+    }
+    
+    S.pg.c = 1; proc();
+    if (window.pop) { window.pop.remove(); window.pop = null; }
+}
+
+function applyHighlight(key, color) {
+    if (!window.pop) return;
+
+    // 'X' button clicked: clear all highlights for this column
+    if (color === null) {
+        delete S.highlights[key];
+    } else {
+        const selectedVals = [];
+        window.pop.querySelectorAll('.flt-val:checked').forEach(cb => selectedVals.push(cb.value));
+
+        if (selectedVals.length > 0) {
+            // Ensure the column array exists
+            if (!S.highlights[key]) S.highlights[key] = [];
+
+            // 1. Clean existing rules for this column: remove currently selected values from them
+            // to avoid conflicts (a value can only have one color).
+            S.highlights[key].forEach(rule => {
+                rule.vals = rule.vals.filter(v => !selectedVals.includes(v));
+            });
+
+            // 2. Remove any rules that became empty after cleaning
+            S.highlights[key] = S.highlights[key].filter(rule => rule.vals.length > 0);
+
+            // 3. Add the new rule
+            S.highlights[key].push({ vals: selectedVals, color: color });
+        } else {
+            alert('Selecione valores para destacar.');
+            return;
+        }
+    }
+    proc(); 
+    if (window.pop) { window.pop.remove(); window.pop = null; }
+}
+
+function updateSelectAllCheckbox() {
+    if (!window.pop) return;
+    const container = window.pop.querySelector('.flt-c');
+    const allVisibleCheckboxes = Array.from(container.querySelectorAll('.flt-val')).filter(cb => cb.closest('.flt-i').style.display !== 'none');
+    const checkedVisibleCheckboxes = allVisibleCheckboxes.filter(cb => cb.checked);
+    const selectAll = container.querySelector('input[onchange*="toggleSelectAll"]');
+    if (selectAll) {
+        if (checkedVisibleCheckboxes.length === 0) { selectAll.checked = false; selectAll.indeterminate = false; }
+        else if (checkedVisibleCheckboxes.length === allVisibleCheckboxes.length) { selectAll.checked = true; selectAll.indeterminate = false; }
+        else { selectAll.checked = false; selectAll.indeterminate = true; }
+    }
 }
 
 // --- DOC VIEWER ---
@@ -287,18 +617,6 @@ async function renderDoc(){
 }
 
 // --- UTILS ---
-function flt(e,k){
-    e.stopPropagation(); if(window.pop)window.pop.remove();
-    const u=[...new Set(S.d.map(r=>String(r[k])))].sort().slice(0,500), act=S.flt[k]||[];
-    const p=document.createElement('div'); p.className='flt-pn';
-    p.style.left=(e.clientX-180)+'px'; p.style.top=(e.clientY+10)+'px';
-    p.innerHTML=`<input id="fs" placeholder="Filtrar..."><div id="fl" class="flt-ls"></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:0.75rem"><button onclick="af('${k}',1)" style="color:#ef4444;background:none;border:none;cursor:pointer">Limpar</button><button onclick="af('${k}',0)" style="color:#2563eb;background:none;border:none;cursor:pointer;font-weight:700">Filtrar</button></div>`;
-    document.body.appendChild(p); window.pop=p;
-    const l=p.querySelector('#fl'), s=p.querySelector('#fs');
-    const rL=(tx)=>{l.innerHTML='';u.filter(v=>v.toLowerCase().includes(tx.toLowerCase())).forEach(v=>{l.innerHTML+=`<label class="flt-row"><input type="checkbox" value="${v}" ${!act.length||act.includes(v)?'checked':''}> ${v}</label>`})};
-    rL(''); s.oninput=e=>rL(e.target.value); s.onclick=e=>e.stopPropagation();
-}
-window.af=(k,c)=>{if(c)delete S.flt[k];else{const ch=[...window.pop.querySelectorAll('input:checked')].map(i=>i.value);if(ch.length!==window.pop.querySelectorAll('input').length)S.flt[k]=ch;else delete S.flt[k]}window.pop.remove();window.pop=null;S.pg.c=1;proc()};
 function mod(i){
     const r=S.fd[i], b=document.getElementById('md'); b.innerHTML='';
     Object.keys(r).forEach(k=>{
@@ -316,21 +634,22 @@ function search(v){S.q=v;S.pg.c=1;proc()}
 function setView(m){S.vm=m;if(S.m==='table')renderTbl();document.getElementById('bm').className=m==='modern'?'nav-l act':'nav-l';document.getElementById('be').className=m==='excel'?'nav-l act':'nav-l'}
 function toggleSb(){document.getElementById('sb').classList.toggle('c');lucide.createIcons()}
 function UI(n,tm){document.getElementById('pt').innerText=n;document.getElementById('ht').style.display=tm?'flex':'none';document.getElementById('pg').style.display=tm?'flex':'none';document.getElementById('tc').className='ctn'}
-function renderEmpty(){document.getElementById('tc').innerHTML=`<div class="empty"><div style="background:#f1f5f9;padding:15px;border-radius:50%;margin-bottom:15px"><i data-lucide="folder-open" width="32" style="color:#94a3b8"></i></div><h3 style="margin:0 0 5px;color:#1e293b">${T[L].empty}</h3><button onclick="document.getElementById('fi').click()" style="background:var(--c-p);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;margin-top:10px">${T[L].impBtn}</button></div>`;UI(T[L].home,false);lucide.createIcons()}
 
-// --- HISTÓRICO ---
+// --- HISTÓRICO & EMPTY ---
 async function loadHist(){
     const c=document.getElementById('hl'), ks=await DB.l(); c.innerHTML='';
     if(!ks.length){c.innerHTML='<div style="padding:15px;text-align:center;font-size:0.8rem;color:#64748b">Vazio</div>';return}
     ks.reverse().forEach(n=>{
         const d=document.createElement('div');d.className='hist';
-        d.innerHTML=`<div class="hist-l"><i data-lucide="file" width="14" style="flex-shrink:0"></i><span class="fn">${n}</span></div><div class="hist-del"><i data-lucide="trash-2" width="14"></i></div>`;
+        d.innerHTML=`<div class="hist-l"><div class="icon-box" style="width:16px"><i data-lucide="file" width="14"></i></div><span class="fn">${n}</span></div><div class="hist-del"><i data-lucide="trash-2" width="14"></i></div>`;
         d.onclick=()=>oh(n); d.querySelector('.hist-del').onclick=e=>{e.stopPropagation();dh(n)};
         c.appendChild(d);
     }); lucide.createIcons();
 }
 async function oh(n){document.getElementById('ld').style.display='flex';try{const f=await DB.g(n);f?(f.t==='table'?loadTable(f.d,f.n):loadDoc(f.d,f.n,f.t)):(alert('Erro'),loadHist())}catch(e){}finally{document.getElementById('ld').style.display='none'}}
 async function dh(n){if(confirm('Excluir?')){await DB.d(n);loadHist();if(S.fn===n)renderEmpty()}}
+
+function renderEmpty(){document.getElementById('tc').innerHTML=`<div class="empty"><div style="background:#f1f5f9;padding:15px;border-radius:50%;margin-bottom:15px"><i data-lucide="folder-open" width="32" style="color:#94a3b8"></i></div><h3 style="margin:0 0 5px;color:#1e293b">${T[L].empty}</h3><button onclick="document.getElementById('fi').click()" style="background:var(--c-p);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;margin-top:10px">${T[L].impBtn}</button></div>`;UI(T[L].home,false);lucide.createIcons()}
 
 init();
 </script>
