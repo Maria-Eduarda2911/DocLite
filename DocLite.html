@@ -11,7 +11,7 @@
 
 <style>
 /* --- CORE CSS --- */
-:root{--w-sb:240px;--w-sb-c:56px;--h-hd:56px;--c-p:#2563eb;--bg:#f8fafc;--txt:#1e293b;--gry:#64748b;--brd:#e2e8f0}
+:root{--w-sb:240px;--w-sb-c:56px;--h-hd:56px;--c-p:#2563eb;--bg:#f8fafc;--txt:#1e293b;--gry:#64748b;--brd:#e2e8f0;--hl-red:#fecaca;--hl-grn:#bbf7d0;--hl-blu:#bfdbfe;--hl-yel:#fef08a}
 *{box-sizing:border-box}body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-size:0.85rem}
 .app{display:flex;height:100vh}.main{flex:1;display:flex;flex-direction:column;background:#fff;overflow:hidden}
 
@@ -114,7 +114,7 @@ tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
 .clr-row{display:flex;gap:8px;justify-content:center;padding:0 12px 8px}
 .clr-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:1px solid rgba(0,0,0,0.1);transition:.2s;display:flex;align-items:center;justify-content:center}
 .clr-dot:hover{transform:scale(1.1);border-color:#94a3b8}
-.clr-dot.red{background:#fecaca}.clr-dot.grn{background:#bbf7d0}.clr-dot.blu{background:#bfdbfe}.clr-dot.yel{background:#fef08a}
+.clr-dot.red{background:var(--hl-red)}.clr-dot.grn{background:var(--hl-grn)}.clr-dot.blu{background:var(--hl-blu)}.clr-dot.yel{background:var(--hl-yel)}
 .clr-dot.clr{background:#f1f5f9;color:#ef4444;font-size:10px}
 
 /* Modals */
@@ -128,7 +128,7 @@ tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
 .mod-v a {color:var(--c-p);text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} .mod-v a:hover{text-decoration:underline}
 
 /* --- DARK MODE --- */
-body.dark{--bg:#020617;--txt:#f1f5f9;--brd:#1e293b;--gry:#94a3b8}
+body.dark{--bg:#020617;--txt:#f1f5f9;--brd:#1e293b;--gry:#94a3b8;--hl-red:#7f1d1d;--hl-grn:#14532d;--hl-blu:#1e3a8a;--hl-yel:#713f12}
 body.dark .main,body.dark .head,body.dark .ctn,body.dark .pag,body.dark .flt-pop,body.dark .mod-bx{background:#0f172a;color:#f1f5f9}
 body.dark .sb{border-right-color:#1e293b}
 body.dark .brand-wrap,body.dark .head,body.dark .pag,body.dark .flt-h,body.dark .flt-f,body.dark .mod-i,body.dark .zm-c{border-color:#1e293b}
@@ -469,7 +469,7 @@ function openFilter(e, key) {
         const isChecked = activeFilters === undefined || activeFilters.includes(v);
         return `<div class="flt-i"><label><input type="checkbox" class="flt-val" value="${v.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}>${v}</label></div>`
     }).join('');
-    pop.innerHTML = `<div class="flt-h"><input type="text" placeholder="Buscar..." oninput="searchFilter(this)"></div><div class="flt-c"><div class="flt-i"><label><input type="checkbox" onchange="toggleSelectAll(this)"><b>(Todos)</b></label></div>${listItems}</div><div class="flt-f"><button onclick="applyFilter('${key}')" class="pri">OK</button><button onclick="window.pop.remove()">X</button></div><div class="clr-sec"><span class="clr-lbl">${T[L].hlt}</span><div class="clr-row"><div class="clr-dot grn" onclick="applyHighlight('${key}', '#bbf7d0')"></div><div class="clr-dot blu" onclick="applyHighlight('${key}', '#bfdbfe')"></div><div class="clr-dot red" onclick="applyHighlight('${key}', '#fecaca')"></div><div class="clr-dot yel" onclick="applyHighlight('${key}', '#fef08a')"></div><div class="clr-dot clr" onclick="applyHighlight('${key}', null)"><i data-lucide="x" width="12"></i></div></div></div>`;
+    pop.innerHTML = `<div class="flt-h"><input type="text" placeholder="Buscar..." oninput="searchFilter(this)"></div><div class="flt-c"><div class="flt-i"><label><input type="checkbox" onchange="toggleSelectAll(this)"><b>(Todos)</b></label></div>${listItems}</div><div class="flt-f"><button onclick="applyFilter('${key}')" class="pri">OK</button><button onclick="window.pop.remove()">X</button></div><div class="clr-sec"><span class="clr-lbl">${T[L].hlt}</span><div class="clr-row"><div class="clr-dot grn" onclick="applyHighlight('${key}', 'var(--hl-grn)')"></div><div class="clr-dot blu" onclick="applyHighlight('${key}', 'var(--hl-blu)')"></div><div class="clr-dot red" onclick="applyHighlight('${key}', 'var(--hl-red)')"></div><div class="clr-dot yel" onclick="applyHighlight('${key}', 'var(--hl-yel)')"></div><div class="clr-dot clr" onclick="applyHighlight('${key}', null)"><i data-lucide="x" width="12"></i></div></div></div>`;
     document.body.appendChild(pop);
     const rect = btn.getBoundingClientRect();
     pop.style.left = `${rect.left}px`;
