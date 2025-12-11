@@ -11,36 +11,23 @@
 
 <style>
 /* --- CORE CSS --- */
-/* Ajuste: --w-sb-c reduzido para 56px (mais compacto) */
 :root{--w-sb:240px;--w-sb-c:56px;--h-hd:56px;--c-p:#2563eb;--bg:#f8fafc;--txt:#1e293b;--gry:#64748b;--brd:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-size:0.85rem}
 .app{display:flex;height:100vh}.main{flex:1;display:flex;flex-direction:column;background:#fff;overflow:hidden}
 
 /* --- SIDEBAR & LANG --- */
 .sb{width:var(--w-sb);background:#0f172a;color:#cbd5e1;display:flex;flex-direction:column;transition:.3s ease;z-index:20;flex-shrink:0;border-right:1px solid #1e293b}
-/* Hide elements when collapsed */
 .sb.c{width:var(--w-sb-c)}.sb.c :is(.brand span,.nav-t,.nav-l span,.hist .fn,.hist-del,.lang-sw){display:none}
 
 .brand-wrap{height:var(--h-hd);border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;padding:0 1rem; transition: padding .3s}
 .brand{display:flex;align-items:center;font-weight:700;font-size:1rem;color:#fff;gap:12px; transition: gap .3s}
 
-/* COLLAPSED STATE ALIGNMENT FIXES */
-.sb.c .brand-wrap{justify-content:center; padding:0;} /* Remove padding to center perfectly */
-.sb.c .brand {gap: 0; justify-content: center;} /* Remove gap so icon is centered */
+/* COLLAPSED STATE */
+.sb.c .brand-wrap{justify-content:center; padding:0;} 
+.sb.c .brand {gap: 0; justify-content: center;} 
 
-/* Icon Containers */
-.brand-box{
-    width: 32px; height: 32px; 
-    background: #3b82f6; 
-    border-radius: 6px; 
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-}
-.icon-box {
-    width: 32px; height: 20px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-}
+.brand-box{width: 32px; height: 32px; background: #3b82f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+.icon-box {width: 32px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
 
 .lang-sw{display:flex;gap:4px;font-size:0.75rem;font-weight:600}
 .lang-opt{cursor:pointer;padding:2px 4px;border-radius:4px;color:#64748b;transition:.2s}.lang-opt:hover{color:#fff} .lang-opt.act{background:#3b82f6;color:#fff}
@@ -49,23 +36,9 @@
 .nav-l{color:#94a3b8;padding:.65rem 1rem;display:flex;gap:12px;cursor:pointer;border-left:3px solid transparent;transition:.2s;align-items:center;font-size:0.85rem}
 .nav-l:hover{background:#1e293b;color:#fff}.nav-l.act{background:#1e293b;border-left-color:var(--c-p);color:#fff}
 
-/* Collapsed Nav Item Alignment */
-.sb.c .nav-l{
-    justify-content:center; 
-    padding:.75rem 0; /* Vertical padding only, horiz 0 to force center */
-    border-left: 3px solid transparent; /* Keep border logic but hidden visually if centered? No, keep it. */
-}
-.sb.c .nav-l.act {
-    border-left-color: transparent; /* Optional: hide left border in collapsed mode if it looks weird, or keep it */
-    background: #1e293b;
-    position: relative;
-}
-/* Optional: Add a dot or small indicator for collapsed active state instead of left border */
-.sb.c .nav-l.act::after {
-    content:''; position:absolute; right:4px; top:50%; transform:translateY(-50%);
-    width:4px; height:4px; background:var(--c-p); border-radius:50%;
-}
-
+.sb.c .nav-l{justify-content:center; padding:.75rem 0; border-left: 3px solid transparent;}
+.sb.c .nav-l.act {border-left-color: transparent; background: #1e293b; position: relative;}
+.sb.c .nav-l.act::after {content:''; position:absolute; right:4px; top:50%; transform:translateY(-50%); width:4px; height:4px; background:var(--c-p); border-radius:50%;}
 
 .hist-box{flex:1;overflow-y:auto;overflow-x:hidden}
 .hist{padding:8px 12px 8px 16px;display:flex;align-items:center;justify-content:space-between;color:#94a3b8;cursor:pointer;border-bottom:1px solid #1e293b;transition:.2s;font-size:0.8rem}
@@ -75,12 +48,18 @@
 .hist-del{width:28px;height:28px;border-radius:4px;color:#ef4444;transition:.2s;display:flex;align-items:center;justify-content:center;opacity:0.6}
 .hist-del:hover{background:#ef444420;opacity:1}
 
-/* --- HEADER & SEARCH --- */
+/* --- HEADER, SEARCH & ZOOM --- */
 .head{height:var(--h-hd);border-bottom:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;padding:0 1.5rem;background:#fff}
 .sch{position:relative;color:#64748b}
 .sch i{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px}
 .sch input{padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;width:300px;outline:none;font-size:0.85rem;color:#1e293b;transition:border-color .2s}
 .sch input:focus{border-color:var(--c-p)}
+
+/* Zoom Controls */
+.zm-c {display:none; align-items:center; gap:8px; background:#f1f5f9; padding:4px; border-radius:6px; border:1px solid #e2e8f0}
+.zm-btn {width:24px; height:24px; display:flex; align-items:center; justify-content:center; border:1px solid #cbd5e1; background:#fff; border-radius:4px; cursor:pointer; color:#475569}
+.zm-btn:hover {background:#f8fafc; color:var(--c-p)}
+.zm-val {font-size:0.75rem; font-weight:600; min-width:40px; text-align:center; font-variant-numeric:tabular-nums}
 
 /* --- TABLE --- */
 .ctn{flex:1;overflow:auto;position:relative;background:#fff}
@@ -94,7 +73,10 @@ tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
 .t-bool{text-align:center;font-weight:600}
 
 /* --- DOC VIEWER --- */
-.doc-v{padding:30px;background:#e2e8f0;min-height:100%;display:flex;flex-direction:column;align-items:center;gap:20px}
+.doc-v{padding:30px;background:#e2e8f0;min-height:100%;display:flex;flex-direction:column;align-items:center;gap:20px; overflow:auto;}
+/* The wrapper handles the scaling */
+.doc-wrap {transition: transform 0.2s ease-out; transform-origin: top center; display: flex; flex-direction: column; align-items: center; gap: 20px;}
+
 .page{background:#fff;width:100%;max-width:800px;min-height:1000px;padding:50px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);color:#0f172a;line-height:1.6;position:relative}
 .doc-content * { background: transparent !important; box-shadow: none !important; color: inherit !important; }
 .doc-content p { margin-bottom: 0.8em; }
@@ -144,6 +126,30 @@ tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
 .mod-l{font-size:.65rem;text-transform:uppercase;color:#64748b;font-weight:700;display:block;margin-bottom:2px}
 .mod-v{font-size:.85rem;color:#0f172a;word-break:break-word}
 .mod-v a {color:var(--c-p);text-decoration:none;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%} .mod-v a:hover{text-decoration:underline}
+
+/* --- DARK MODE --- */
+body.dark{--bg:#020617;--txt:#f1f5f9;--brd:#1e293b;--gry:#94a3b8}
+body.dark .main,body.dark .head,body.dark .ctn,body.dark .pag,body.dark .flt-pop,body.dark .mod-bx{background:#0f172a;color:#f1f5f9}
+body.dark .sb{border-right-color:#1e293b}
+body.dark .brand-wrap,body.dark .head,body.dark .pag,body.dark .flt-h,body.dark .flt-f,body.dark .mod-i,body.dark .zm-c{border-color:#1e293b}
+body.dark .nav-l:hover,body.dark .nav-l.act,body.dark .hist:hover,body.dark .zm-btn:hover,body.dark .flt-btn:hover,body.dark .flt-btn.act,body.dark .flt-i:hover,body.dark .pag button:hover:not(:disabled){background:#1e293b;color:#f1f5f9}
+body.dark .sch input,body.dark .flt-h input,body.dark .zm-btn,body.dark .pag button,body.dark .mod-i,body.dark .flt-f button{background:#0f172a;border-color:#334155;color:#f1f5f9}
+body.dark .flt-f button.pri{background:var(--c-p);border-color:var(--c-p);color:#fff}
+body.dark .zm-c{background:#0f172a}
+body.dark .tbl{background:#0f172a}
+body.dark th{background:#1e293b;border-bottom-color:#334155;color:#cbd5e1}
+body.dark td{border-bottom-color:#1e293b;color:#e2e8f0}
+body.dark tr:hover td{background:rgba(255,255,255,0.05)}
+body.dark .page{background:#1e293b;color:#f1f5f9}
+body.dark #rc{background:#1e293b;border-color:#334155;color:#94a3b8}
+body.dark .doc-v{background:#020617}
+body.dark .load{background:rgba(15,23,42,0.9)}
+body.dark #ld-t{color:#cbd5e1!important}
+body.dark .spin{border-color:#334155;border-top-color:var(--c-p)}
+body.dark .clr-sec{border-top-color:#334155}
+body.dark .clr-dot.clr{background:#334155}
+body.dark .mod-v{color:#e2e8f0}
+body.dark .mod-v a{color:#60a5fa}
 </style>
 </head>
 <body>
@@ -172,6 +178,7 @@ tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
                 <span>DocLite</span>
             </div>
             <div class="lang-sw">
+                <div id="th-t" style="cursor:pointer;margin-right:8px;display:flex;align-items:center" onclick="toggleTheme()"></div>
                 <span class="lang-opt act" onclick="setLang('pt')">PT</span>
                 <span style="opacity:0.5">|</span>
                 <span class="lang-opt" onclick="setLang('en')">EN</span>
@@ -204,13 +211,21 @@ tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
     
     <main class="main">
         <header class="head">
-            <h3 id="pt" style="margin:0;color:#1e293b;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px">Início</h3>
+            <h3 id="pt" style="margin:0;color:var(--txt);font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px">Início</h3>
+            
             <div id="ht" style="display:flex;gap:10px;align-items:center">
                 <div class="sch">
                     <input id="si" oninput="search(this.value)" placeholder="Filtrar dados...">
                 </div>
                 <span id="rc" style="font-size:.7rem;color:var(--gry);background:#f1f5f9;padding:2px 6px;border-radius:4px;border:1px solid #e2e8f0"></span>
             </div>
+
+            <div id="zc" class="zm-c">
+                <div class="zm-btn" onclick="changeZoom(-0.1)"><i data-lucide="minus" width="14"></i></div>
+                <span id="zv" class="zm-val">100%</span>
+                <div class="zm-btn" onclick="changeZoom(0.1)"><i data-lucide="plus" width="14"></i></div>
+            </div>
+
         </header>
         <div class="ctn" id="tc"></div>
         <div class="pag" id="pg" style="display:none"></div>
@@ -221,15 +236,15 @@ tr:hover td{background-color:rgba(0,0,0,0.05); cursor:default}
 // --- TRANSLATION ---
 const T={pt:{view:"Visualização",list:"Lista",grid:"Grade",actions:"Ações",open:"Abrir Arquivo",recent:"Recentes",empty:"Nenhum arquivo",home:"Início",search:"Filtrar dados...",rows:"linhas",load:"Lendo arquivo...",detTitle:"Detalhes",toastCopy:"Texto copiado!",impBtn:"Importar",hlt:"Destacar cor",yes:"Sim",no:"Não"},en:{view:"View Mode",list:"List",grid:"Grid",actions:"Actions",open:"Open File",recent:"Recent",empty:"No file open",home:"Home",search:"Search data...",rows:"rows",load:"Reading file...",detTitle:"Details",toastCopy:"Text copied!",impBtn:"Import",hlt:"Highlight",yes:"Yes",no:"No"}};
 let L=localStorage.getItem('dl_lang')||'pt';
+let Th=localStorage.getItem('dl_theme')||'light';
 const EMPTY_VAL = '(vazio)';
 
 // --- CORE ---
-// Highlights now stores an array of rules per column: { colName: [ {vals:[], color:''}, ... ] }
-let S={d:[],m:'empty',c:null,fd:[],cols:[],types:{},vm:'modern',q:'',sort:{k:null,d:'asc'},pg:{c:1,pp:100},fn:'',filters:{},filterData:{},highlights:{}};
+let S={d:[],m:'empty',c:null,fd:[],cols:[],types:{},vm:'modern',q:'',sort:{k:null,d:'asc'},pg:{c:1,pp:100},fn:'',filters:{},filterData:{},highlights:{}, zoom:1};
 const DBName='DocuLiteV8', DB={o:()=>new Promise((r,j)=>{const q=indexedDB.open(DBName,1);q.onupgradeneeded=e=>e.target.result.createObjectStore('f',{keyPath:'n'});q.onsuccess=e=>r(e.target.result);q.onerror=j}),w:async(d)=>{const db=await DB.o(),tx=db.transaction('f','readwrite');tx.objectStore('f').put(d);return new Promise(r=>tx.oncomplete=r)},g:async(n)=>{const db=await DB.o();return new Promise(r=>{const q=db.transaction('f').objectStore('f').get(n);q.onsuccess=()=>r(q.result)})},d:async(n)=>{const db=await DB.o(),tx=db.transaction('f','readwrite');tx.objectStore('f').delete(n);return new Promise(r=>tx.oncomplete=r)},l:async()=>{const db=await DB.o();return new Promise(r=>{const q=db.transaction('f').objectStore('f').getAllKeys();q.onsuccess=()=>r(q.result)})}};
 
 function init(){
-    setLang(L); lucide.createIcons(); loadHist(); renderEmpty();
+    setLang(L); setTheme(Th); lucide.createIcons(); loadHist(); renderEmpty();
     document.getElementById('fi').addEventListener('change',HF);
     document.addEventListener('click',e=>{if(window.pop&&!window.pop.contains(e.target)&&!e.target.closest('.flt-btn')){window.pop.remove();window.pop=null}});
     document.addEventListener('copy', ()=>{if(S.m==='doc'&&window.getSelection().toString().length>0)showToast()});
@@ -246,6 +261,16 @@ function setLang(l){
     document.getElementById('toast').textContent=T[L].toastCopy;
     if(S.m==='empty')renderEmpty(); else if(S.m==='table')renderPag();
 }
+function setTheme(t){
+    Th=t; localStorage.setItem('dl_theme',t);
+    document.body.classList.toggle('dark', t==='dark');
+    const el = document.getElementById('th-t');
+    if(el) {
+        el.innerHTML = `<i data-lucide="${t==='dark'?'sun':'moon'}" width="14" style="color:${t==='dark'?'#fbbf24':'#64748b'}"></i>`;
+        lucide.createIcons();
+    }
+}
+function toggleTheme(){setTheme(Th==='light'?'dark':'light')}
 function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 
 // --- FILE HANDLER ---
@@ -267,7 +292,6 @@ async function HF(e){
 
 // --- TABLE LOGIC ---
 function loadTable(d,n){
-    // Reset highlights/filters on new load
     S={...S,m:'table',d:d,fn:n,cols:d.length?Object.keys(d[0]):[],types:anlz(d),q:'',pg:{c:1,pp:100},filters:{},filterData:{},highlights:{}};
     UI(n,true); proc();
 }
@@ -297,27 +321,20 @@ function anlz(d) {
                 const n = parseFloat(s.replace(/\./g, '').replace(',', '.'));
                 if (!isNaN(n)) potentialNumber = n;
             }
-            
-            // Strict Excel Date Check (Must be > 20000 to avoid confusing 0/1 with dates)
             if (potentialNumber && potentialNumber > 20000 && potentialNumber < 100000) isExcelDate = true;
-            
             if (isExcelDate) { sc.d++; return; }
-            
-            // Header based date check, BUT ignore small integers (0/1)
             if (/data|date|venc|criado|atuali/i.test(k)) {
                  if (!isNaN(new Date(v)) && !(potentialNumber >= 0 && potentialNumber <= 1)) {
                      sc.d++; return;
                  }
             }
-
             if (/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(.\d+)?Z?)?$/.test(s) || /^\d{2}\/\d{2}\/\d{4}$/.test(s)) sc.d++;
             else if (/^R\$\s?[\d.,]+/.test(s)) sc.c++;
             else if (!isNaN(Number(s.replace(',', '.')))) sc.n++;
             else sc.s++;
         });
 
-        // Priority logic
-        if (sc.b > sc.tot * 0.9) t[k] = 'bool'; // High confidence boolean
+        if (sc.b > sc.tot * 0.9) t[k] = 'bool'; 
         else if (sc.d > sc.tot * 0.5) t[k] = 'date';
         else if (sc.c > sc.tot * 0.5) t[k] = 'currency';
         else if (sc.n > sc.tot * 0.5) t[k] = 'number';
@@ -328,14 +345,12 @@ function anlz(d) {
 
 function fmt(v,t){
     if(v==null||v==='')return '<span class="t-empty">-</span>';
-    
     if(t==='bool') {
         const s = String(v).toLowerCase();
         if (v === true || v === 1 || s === 'true') return `<span style="color:#16a34a;font-weight:600">${T[L].yes}</span>`;
         if (v === false || v === 0 || s === 'false') return `<span style="color:#dc2626;font-weight:600">${T[L].no}</span>`;
         return v;
     }
-
     if(t==='date'){
         let excelDateNum = null;
         if(typeof v === 'number') excelDateNum = v;
@@ -371,15 +386,13 @@ function proc(){
                 const filterValues = S.filters[col];
                 if (filterValues === undefined) return true;
                 if (filterValues.length === 0) return true; 
-                
                 let val = row[col];
                 if (val === null || val === '') val = EMPTY_VAL;
                 else {
                      const t = S.types[col];
-                     if (S.vm === 'modern' || t === 'date' || t === 'bool') val = fmt(val, t).replace(/<[^>]*>?/gm, ''); // Strip HTML for filter comparison
+                     if (S.vm === 'modern' || t === 'date' || t === 'bool') val = fmt(val, t).replace(/<[^>]*>?/gm, ''); 
                      else val = String(val);
                 }
-                
                 return filterValues.includes(val);
             });
         });
@@ -395,43 +408,32 @@ function renderTbl(){
     let h=`<table class="tbl ${S.vm}"><thead><tr>`;
     S.cols.forEach(k=>{
         const hasFlt = S.filters[k] !== undefined;
-        // Check if column has any highlight rules defined
         const hasHlt = S.highlights[k] && S.highlights[k].length > 0;
         h+=`<th><div class="th-c"><span onclick="srt('${k}')" style="cursor:pointer">${k}</span><i data-lucide="filter" class="flt-btn ${(hasFlt||hasHlt) ? 'act' : ''}" width="14" height="14" onclick="openFilter(event, '${k}')" style="${hasHlt ? 'color:#ec4899' : ''}"></i></div></th>`
     });
     h+='</tr></thead><tbody>';
-    
     dt.forEach((r,i)=>{
         let rowBg = '';
         const activeCols = Object.keys(S.highlights);
-        
-        // Outer loop: iterate through columns with highlights
         outerLoop:
         if (activeCols.length > 0) {
             for (const col of activeCols) {
-                const rulesArray = S.highlights[col]; // Get array of rules for this column
-
-                // Prepare value for comparison
+                const rulesArray = S.highlights[col]; 
                 let val = r[col];
                 if (val === null || val === '') val = EMPTY_VAL;
                 else {
                     const t = S.types[col];
-                    // Must match the format used in the filter list and applyHighlight
                     if (S.vm === 'modern' || t === 'date' || t === 'bool') val = fmt(val, t).replace(/<[^>]*>?/gm, '');
                     else val = String(val);
                 }
-
-                // Inner loop: check against all rules for this column
                 for (const rule of rulesArray) {
                     if (rule.vals.includes(val)) {
                         rowBg = rule.color;
-                        // Stop searching rules once a match is found for this row
                         break outerLoop; 
                     }
                 }
             }
         }
-
         h+=`<tr onclick="mod(${st+i})" style="${rowBg ? 'background-color:'+rowBg : ''}">`;
         S.cols.forEach(k=>{
             const t=S.types[k];
@@ -447,60 +449,27 @@ function renderTbl(){
 function openFilter(e, key) {
     e.stopPropagation();
     if (window.pop) { window.pop.remove(); window.pop = null; }
-    
     const btn = e.target.closest('.flt-btn');
     if (!S.filterData[key]) {
         const type = S.types[key];
         const unique = new Set(S.d.map(r => {
             if (r[key] === null || r[key] === '') return EMPTY_VAL;
             let val = r[key];
-            if (S.vm === 'modern' || type === 'date' || type === 'bool') {
-                 // Format and strip HTML for filter list
-                 return fmt(val, type).replace(/<[^>]*>?/gm, '');
-            }
+            if (S.vm === 'modern' || type === 'date' || type === 'bool') return fmt(val, type).replace(/<[^>]*>?/gm, '');
             return String(val);
         }));
         S.filterData[key] = [...unique].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     }
     const values = S.filterData[key];
     const activeFilters = S.filters[key];
-
     const pop = document.createElement('div');
     pop.className = 'flt-pop';
     pop.onclick = e => e.stopPropagation();
-    
     let listItems = values.map(v => {
         const isChecked = activeFilters === undefined || activeFilters.includes(v);
-        return `
-        <div class="flt-i">
-            <label><input type="checkbox" class="flt-val" value="${v.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}>${v}</label>
-        </div>
-    `}).join('');
-
-    pop.innerHTML = `
-        <div class="flt-h">
-            <input type="text" placeholder="Buscar..." oninput="searchFilter(this)">
-        </div>
-        <div class="flt-c">
-            <div class="flt-i"><label><input type="checkbox" onchange="toggleSelectAll(this)"><b>(Todos)</b></label></div>
-            ${listItems}
-        </div>
-        <div class="flt-f">
-            <button onclick="applyFilter('${key}')" class="pri">OK</button>
-            <button onclick="window.pop.remove()">X</button>
-        </div>
-        <div class="clr-sec">
-            <span class="clr-lbl">${T[L].hlt}</span>
-            <div class="clr-row">
-                <div class="clr-dot grn" onclick="applyHighlight('${key}', '#bbf7d0')"></div>
-                <div class="clr-dot blu" onclick="applyHighlight('${key}', '#bfdbfe')"></div>
-                <div class="clr-dot red" onclick="applyHighlight('${key}', '#fecaca')"></div>
-                <div class="clr-dot yel" onclick="applyHighlight('${key}', '#fef08a')"></div>
-                <div class="clr-dot clr" onclick="applyHighlight('${key}', null)"><i data-lucide="x" width="12"></i></div>
-            </div>
-        </div>
-    `;
-
+        return `<div class="flt-i"><label><input type="checkbox" class="flt-val" value="${v.replace(/"/g, '&quot;')}" ${isChecked ? 'checked' : ''}>${v}</label></div>`
+    }).join('');
+    pop.innerHTML = `<div class="flt-h"><input type="text" placeholder="Buscar..." oninput="searchFilter(this)"></div><div class="flt-c"><div class="flt-i"><label><input type="checkbox" onchange="toggleSelectAll(this)"><b>(Todos)</b></label></div>${listItems}</div><div class="flt-f"><button onclick="applyFilter('${key}')" class="pri">OK</button><button onclick="window.pop.remove()">X</button></div><div class="clr-sec"><span class="clr-lbl">${T[L].hlt}</span><div class="clr-row"><div class="clr-dot grn" onclick="applyHighlight('${key}', '#bbf7d0')"></div><div class="clr-dot blu" onclick="applyHighlight('${key}', '#bfdbfe')"></div><div class="clr-dot red" onclick="applyHighlight('${key}', '#fecaca')"></div><div class="clr-dot yel" onclick="applyHighlight('${key}', '#fef08a')"></div><div class="clr-dot clr" onclick="applyHighlight('${key}', null)"><i data-lucide="x" width="12"></i></div></div></div>`;
     document.body.appendChild(pop);
     const rect = btn.getBoundingClientRect();
     pop.style.left = `${rect.left}px`;
@@ -525,9 +494,7 @@ function searchFilter(input) {
 function toggleSelectAll(checkbox) {
     const container = checkbox.closest('.flt-c');
     const isChecked = checkbox.checked;
-    container.querySelectorAll('.flt-val').forEach(cb => {
-        if (cb.closest('.flt-i').style.display !== 'none') cb.checked = isChecked;
-    });
+    container.querySelectorAll('.flt-val').forEach(cb => {if (cb.closest('.flt-i').style.display !== 'none') cb.checked = isChecked;});
     updateSelectAllCheckbox();
 }
 
@@ -535,41 +502,23 @@ function applyFilter(key) {
     if (!window.pop) return;
     const selected = [];
     window.pop.querySelectorAll('.flt-val:checked').forEach(cb => selected.push(cb.value));
-    
-    if (selected.length === 0 || selected.length === S.filterData[key].length) {
-        delete S.filters[key];
-    } else {
-        S.filters[key] = selected;
-    }
-    
+    if (selected.length === 0 || selected.length === S.filterData[key].length) delete S.filters[key];
+    else S.filters[key] = selected;
     S.pg.c = 1; proc();
     if (window.pop) { window.pop.remove(); window.pop = null; }
 }
 
 function applyHighlight(key, color) {
     if (!window.pop) return;
-
-    // 'X' button clicked: clear all highlights for this column
     if (color === null) {
         delete S.highlights[key];
     } else {
         const selectedVals = [];
         window.pop.querySelectorAll('.flt-val:checked').forEach(cb => selectedVals.push(cb.value));
-
         if (selectedVals.length > 0) {
-            // Ensure the column array exists
             if (!S.highlights[key]) S.highlights[key] = [];
-
-            // 1. Clean existing rules for this column: remove currently selected values from them
-            // to avoid conflicts (a value can only have one color).
-            S.highlights[key].forEach(rule => {
-                rule.vals = rule.vals.filter(v => !selectedVals.includes(v));
-            });
-
-            // 2. Remove any rules that became empty after cleaning
+            S.highlights[key].forEach(rule => { rule.vals = rule.vals.filter(v => !selectedVals.includes(v)); });
             S.highlights[key] = S.highlights[key].filter(rule => rule.vals.length > 0);
-
-            // 3. Add the new rule
             S.highlights[key].push({ vals: selectedVals, color: color });
         } else {
             alert('Selecione valores para destacar.');
@@ -583,20 +532,35 @@ function applyHighlight(key, color) {
 function updateSelectAllCheckbox() {
     if (!window.pop) return;
     const container = window.pop.querySelector('.flt-c');
-    const allVisibleCheckboxes = Array.from(container.querySelectorAll('.flt-val')).filter(cb => cb.closest('.flt-i').style.display !== 'none');
-    const checkedVisibleCheckboxes = allVisibleCheckboxes.filter(cb => cb.checked);
+    const allVisible = Array.from(container.querySelectorAll('.flt-val')).filter(cb => cb.closest('.flt-i').style.display !== 'none');
+    const checked = allVisible.filter(cb => cb.checked);
     const selectAll = container.querySelector('input[onchange*="toggleSelectAll"]');
     if (selectAll) {
-        if (checkedVisibleCheckboxes.length === 0) { selectAll.checked = false; selectAll.indeterminate = false; }
-        else if (checkedVisibleCheckboxes.length === allVisibleCheckboxes.length) { selectAll.checked = true; selectAll.indeterminate = false; }
+        if (checked.length === 0) { selectAll.checked = false; selectAll.indeterminate = false; }
+        else if (checked.length === allVisible.length) { selectAll.checked = true; selectAll.indeterminate = false; }
         else { selectAll.checked = false; selectAll.indeterminate = true; }
     }
 }
 
-// --- DOC VIEWER ---
-function loadDoc(c,n,t){S={...S,m:'doc',c:{c,t},fn:n};UI(n,false);renderDoc();}
+// --- DOC VIEWER & ZOOM ---
+function loadDoc(c,n,t){S={...S,m:'doc',c:{c,t},fn:n, zoom:1}; UI(n,false); renderDoc(); updateZoomUI();}
+
+function updateZoomUI(){
+    document.getElementById('zv').innerText = Math.round(S.zoom * 100) + '%';
+    const wrap = document.getElementById('dw');
+    if(wrap) wrap.style.transform = `scale(${S.zoom})`;
+}
+
+function changeZoom(d){
+    const newZ = S.zoom + d;
+    if(newZ >= 0.1 && newZ <= 3.0) {
+        S.zoom = newZ;
+        updateZoomUI();
+    }
+}
+
 async function renderDoc(){
-    const c=document.getElementById('tc'); c.innerHTML='<div class="doc-v" id="dv"></div>'; const o=document.getElementById('dv');
+    const c=document.getElementById('tc'); c.innerHTML='<div class="doc-v"><div id="dw" class="doc-wrap"><div id="dv"></div></div></div>'; const o=document.getElementById('dv');
     const {c:ct,t}=S.c;
     if(t==='html'){const p=document.createElement('div');p.className='page doc-content';p.innerHTML=ct;o.appendChild(p)}
     else if(t==='text'){const p=document.createElement('div');p.className='page doc-content txt-mode';p.textContent=ct;o.appendChild(p)}
@@ -614,6 +578,7 @@ async function renderDoc(){
             }
         }catch(e){o.innerHTML=`<p>Erro PDF: ${e.message}</p>`}
     }
+    updateZoomUI();
 }
 
 // --- UTILS ---
@@ -633,7 +598,17 @@ function srt(k){S.sort={k,d:S.sort.k===k&&S.sort.d==='asc'?'desc':'asc'};proc()}
 function search(v){S.q=v;S.pg.c=1;proc()}
 function setView(m){S.vm=m;if(S.m==='table')renderTbl();document.getElementById('bm').className=m==='modern'?'nav-l act':'nav-l';document.getElementById('be').className=m==='excel'?'nav-l act':'nav-l'}
 function toggleSb(){document.getElementById('sb').classList.toggle('c');lucide.createIcons()}
-function UI(n,tm){document.getElementById('pt').innerText=n;document.getElementById('ht').style.display=tm?'flex':'none';document.getElementById('pg').style.display=tm?'flex':'none';document.getElementById('tc').className='ctn'}
+
+function UI(n,tm){
+    document.getElementById('pt').innerText=n;
+    // Show Search if Table Mode, else hide
+    document.getElementById('ht').style.display=tm?'flex':'none';
+    // Show Zoom if Doc Mode (not Table), else hide
+    document.getElementById('zc').style.display=!tm?'flex':'none';
+    // Show pagination if Table Mode
+    document.getElementById('pg').style.display=tm?'flex':'none';
+    document.getElementById('tc').className='ctn';
+}
 
 // --- HISTÓRICO & EMPTY ---
 async function loadHist(){
@@ -649,7 +624,7 @@ async function loadHist(){
 async function oh(n){document.getElementById('ld').style.display='flex';try{const f=await DB.g(n);f?(f.t==='table'?loadTable(f.d,f.n):loadDoc(f.d,f.n,f.t)):(alert('Erro'),loadHist())}catch(e){}finally{document.getElementById('ld').style.display='none'}}
 async function dh(n){if(confirm('Excluir?')){await DB.d(n);loadHist();if(S.fn===n)renderEmpty()}}
 
-function renderEmpty(){document.getElementById('tc').innerHTML=`<div class="empty"><div style="background:#f1f5f9;padding:15px;border-radius:50%;margin-bottom:15px"><i data-lucide="folder-open" width="32" style="color:#94a3b8"></i></div><h3 style="margin:0 0 5px;color:#1e293b">${T[L].empty}</h3><button onclick="document.getElementById('fi').click()" style="background:var(--c-p);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;margin-top:10px">${T[L].impBtn}</button></div>`;UI(T[L].home,false);lucide.createIcons()}
+function renderEmpty(){document.getElementById('tc').innerHTML=`<div class="empty"><div style="background:var(--brd);padding:15px;border-radius:50%;margin-bottom:15px"><i data-lucide="folder-open" width="32" style="color:#94a3b8"></i></div><h3 style="margin:0 0 5px;color:var(--txt)">${T[L].empty}</h3><button onclick="document.getElementById('fi').click()" style="background:var(--c-p);color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;margin-top:10px">${T[L].impBtn}</button></div>`;UI(T[L].home,false);lucide.createIcons(); document.getElementById('zc').style.display='none';}
 
 init();
 </script>
