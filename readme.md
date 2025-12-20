@@ -2,11 +2,10 @@
 
 > **Visualizador universal de arquivos 100% offline, seguro e leve.**
 
-**DocuLite** é uma ferramenta de *arquivo único* que permite abrir, visualizar e analisar planilhas e documentos diretamente no navegador, sem enviar nada para nenhum servidor.
+**DocLite** é uma ferramenta de *arquivo único* que permite abrir, visualizar e analisar planilhas e documentos diretamente no navegador, sem enviar nada para nenhum servidor.
 
-[![Assista ao Vídeo de Demonstração](https://img.youtube.com/vi/sicFI6fTIcs/maxresdefault.jpg)](https://youtu.be/sicFI6fTIcs)
+[![Assista ao Vídeo de Demonstração](https://img.youtube.com/vi/sicFI6fTIcs/hqdefault.jpg)](https://youtu.be/sicFI6fTIcs)
 > *Clique na imagem acima para ver o vídeo de demonstração.*
-![Tela Principal](/prints/8b76e80c-3476-4fdb-a5e0-f83256ad7a39.jpg)
 
 ---
 
