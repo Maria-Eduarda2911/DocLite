@@ -1,9 +1,11 @@
-# ⚡ DocLite 
+# ⚡ DocLite 
 
 > **Universal file viewer 100% offline, secure, and lightweight.**
 
 **DocuLite** is a *single-file* tool that allows you to open, view, and analyze spreadsheets and documents directly in the browser, without uploading them to any server.
 
+[![Watch the Demo Video](https://img.youtube.com/vi/sicFI6fTIcs/maxresdefault.jpg)](https://youtu.be/sicFI6fTIcs)
+> *Click the image above to watch the demo video.*
 ![Main Screen](/prints/8b76e80c-3476-4fdb-a5e0-f83256ad7a39.jpg)
 
 ---
@@ -66,10 +68,10 @@ DocuLite was built with a **Zero-Backend** philosophy. All logic resides in a si
 
 ## 📦 How to Use
 
-1.  Download the `DocLite.html` file.
-2.  Open it in any modern browser (Chrome, Edge, Firefox, Brave).
-3.  Drag a file or click on **Import**.
-4.  Your recent files will appear in the sidebar automatically.
+1.  Download the `DocLite.html` file.
+2.  Open it in any modern browser (Chrome, Edge, Firefox, Brave).
+3.  Drag a file or click on **Import**.
+4.  Your recent files will appear in the sidebar automatically.
 
 ### Supported Formats
 | Type | Extensions |
